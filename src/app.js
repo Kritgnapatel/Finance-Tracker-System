@@ -20,6 +20,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
+app.use("/api/users", userRoutes);
+
 // ❗ ERROR MIDDLEWARE — ALWAYS LAST
 app.use(errorHandler);
 
