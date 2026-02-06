@@ -56,8 +56,81 @@ const getCategories = async (req, res, next) => {
     next(error);
   }
 };
+/**
+ * UPDATE CATEGORY
+ */
+const updateCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    const userId = req.user.id;
+
+    if (!name) {
+      throw new AppError("Category name is required", 400);
+    }
+
+    const category = await Category.findOne({
+      where: {
+        id,
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    if (!category) {
+      throw new AppError("Category not found", 404);
+    }
+
+    category.name = name;
+    await category.save();
+
+    return res.json({
+      success: true,
+      message: "Category updated successfully",
+      data: category,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * SOFT DELETE CATEGORY
+ */
+const deleteCategory = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const category = await Category.findOne({
+      where: {
+        id,
+        userId,
+        isDeleted: false,
+      },
+    });
+
+    if (!category) {
+      throw new AppError("Category not found", 404);
+    }
+
+    category.isDeleted = true;
+    await category.save();
+
+    return res.json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 
 module.exports = {
   createCategory,
   getCategories,
+  updateCategory,
+  deleteCategory,
 };
+
