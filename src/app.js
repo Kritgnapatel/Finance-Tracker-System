@@ -21,6 +21,13 @@ app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/users", userRoutes);
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
 
 // ❗ ERROR MIDDLEWARE — ALWAYS LAST
 app.use(errorHandler);

@@ -26,9 +26,16 @@ const Transaction = sequelize.define(
     },
 
     amount: {
-      type: DataTypes.DECIMAL(12, 2),
-      allowNull: false,
+  type: DataTypes.DECIMAL(12, 2),
+  allowNull: false,
+  validate: {
+    notZero(value) {
+      if (Number(value) === 0) {
+        throw new Error("Amount cannot be zero");
+      }
     },
+  },
+},
 
     currency: {
       type: DataTypes.STRING(3),
@@ -43,11 +50,18 @@ const Transaction = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    indexes: [
+    { fields: ["userId"] },
+    { fields: ["categoryId"] },
+    { fields: ["transactionDate"] },
+  ],
   },
   {
     tableName: "transactions",
     timestamps: true,
-  }
+  },
+  
+
 );
 
 module.exports = Transaction;
