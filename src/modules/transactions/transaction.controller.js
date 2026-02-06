@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 const Transaction = require("./transaction.model");
 const Category = require("../categories/category.model");
 const AppError = require("../../utils/AppError");
+const { checkBudgetAndNotify } = require("../budgets/budget.controller");
 
 /**
  * CREATE TRANSACTION
@@ -18,6 +19,7 @@ const createTransaction = async (req, res, next) => {
       transactionDate,
     } = req.body;
 
+    // Validation
     if (!categoryId || !type || amount === undefined || !transactionDate) {
       throw new AppError("Missing required transaction fields", 400);
     }
@@ -30,8 +32,13 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Amount cannot be zero", 400);
     }
 
+    // Category check (ownership + soft delete)
     const category = await Category.findOne({
-      where: { id: categoryId, userId, isDeleted: false },
+      where: {
+        id: categoryId,
+        userId,
+        isDeleted: false,
+      },
     });
 
     if (!category) {
@@ -39,9 +46,10 @@ const createTransaction = async (req, res, next) => {
     }
 
     if (category.type !== type) {
-      throw new AppError("Transaction type mismatch with category", 400);
+      throw new AppError("Transaction type does not match category type", 400);
     }
 
+    // Create transaction
     const transaction = await Transaction.create({
       userId,
       categoryId,
@@ -51,6 +59,15 @@ const createTransaction = async (req, res, next) => {
       description,
       transactionDate,
     });
+
+    // 🔔 Budget check (ONLY for expenses)
+    if (type === "expense") {
+      const dateObj = new Date(transactionDate);
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const year = String(dateObj.getFullYear());
+
+      await checkBudgetAndNotify(userId, categoryId, month, year);
+    }
 
     return res.status(201).json({
       success: true,
@@ -63,7 +80,7 @@ const createTransaction = async (req, res, next) => {
 };
 
 /**
- * LIST TRANSACTIONS
+ * LIST TRANSACTIONS (WITH FILTERS)
  */
 const getTransactions = async (req, res, next) => {
   try {
@@ -128,6 +145,20 @@ const updateTransaction = async (req, res, next) => {
       transaction.transactionDate = transactionDate;
 
     await transaction.save();
+
+    // 🔔 Budget check again (ONLY if expense)
+    if (transaction.type === "expense") {
+      const dateObj = new Date(transaction.transactionDate);
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const year = String(dateObj.getFullYear());
+
+      await checkBudgetAndNotify(
+        userId,
+        transaction.categoryId,
+        month,
+        year
+      );
+    }
 
     return res.json({
       success: true,

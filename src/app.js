@@ -7,7 +7,7 @@ const userRoutes = require("./modules/users/user.routes");
 const errorHandler = require("./middlewares/error.middleware");
 const transactionRoutes = require("./modules/transactions/transaction.routes");
 const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
-
+const budgetRoutes = require("./modules/budgets/budget.routes");
 const app = express();
 
 app.use(cors());
@@ -19,7 +19,7 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
-
+app.use("/api/budgets", budgetRoutes);
 // ❗ ERROR MIDDLEWARE — ALWAYS LAST
 app.use(errorHandler);
 
