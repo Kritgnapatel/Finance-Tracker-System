@@ -5,6 +5,7 @@ const categoryRoutes = require("./modules/categories/category.routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const userRoutes = require("./modules/users/user.routes");
 const errorHandler = require("./middlewares/error.middleware");
+const transactionRoutes = require("./modules/transactions/transaction.routes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api/categories", categoryRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 // ❗ ERROR MIDDLEWARE — ALWAYS LAST
 app.use(errorHandler);
