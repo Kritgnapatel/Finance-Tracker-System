@@ -1,4 +1,4 @@
-const { Op } = require("sequelize"); // ✅ VERY IMPORTANT
+const { Op } = require("sequelize");
 const Transaction = require("./transaction.model");
 const Category = require("../categories/category.model");
 const AppError = require("../../utils/AppError");
@@ -18,7 +18,6 @@ const createTransaction = async (req, res, next) => {
       transactionDate,
     } = req.body;
 
-    // Basic validation
     if (!categoryId || !type || amount === undefined || !transactionDate) {
       throw new AppError("Missing required transaction fields", 400);
     }
@@ -27,30 +26,20 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Invalid transaction type", 400);
     }
 
-    // Amount validation
     if (Number(amount) === 0) {
       throw new AppError("Amount cannot be zero", 400);
     }
 
-    // Check category ownership + soft delete
     const category = await Category.findOne({
-      where: {
-        id: categoryId,
-        userId,
-        isDeleted: false,
-      },
+      where: { id: categoryId, userId, isDeleted: false },
     });
 
     if (!category) {
       throw new AppError("Category not found", 404);
     }
 
-    // Category type must match transaction type
     if (category.type !== type) {
-      throw new AppError(
-        "Transaction type does not match category type",
-        400
-      );
+      throw new AppError("Transaction type mismatch with category", 400);
     }
 
     const transaction = await Transaction.create({
@@ -74,7 +63,7 @@ const createTransaction = async (req, res, next) => {
 };
 
 /**
- * LIST TRANSACTIONS (WITH FILTERS)
+ * LIST TRANSACTIONS
  */
 const getTransactions = async (req, res, next) => {
   try {
@@ -83,12 +72,8 @@ const getTransactions = async (req, res, next) => {
 
     const where = { userId };
 
-    // Filter by category
-    if (categoryId) {
-      where.categoryId = categoryId;
-    }
+    if (categoryId) where.categoryId = categoryId;
 
-    // Filter by type
     if (type) {
       if (!["income", "expense"].includes(type)) {
         throw new AppError("Invalid transaction type filter", 400);
@@ -96,7 +81,6 @@ const getTransactions = async (req, res, next) => {
       where.type = type;
     }
 
-    // ✅ DATE RANGE FILTER (CORRECT SEQUELIZE WAY)
     if (startDate && endDate) {
       where.transactionDate = {
         [Op.between]: [startDate, endDate],
@@ -117,7 +101,74 @@ const getTransactions = async (req, res, next) => {
   }
 };
 
+/**
+ * UPDATE TRANSACTION
+ */
+const updateTransaction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { amount, description, transactionDate } = req.body;
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId },
+    });
+
+    if (!transaction) {
+      throw new AppError("Transaction not found", 404);
+    }
+
+    if (amount !== undefined && Number(amount) === 0) {
+      throw new AppError("Amount cannot be zero", 400);
+    }
+
+    if (amount !== undefined) transaction.amount = amount;
+    if (description !== undefined) transaction.description = description;
+    if (transactionDate !== undefined)
+      transaction.transactionDate = transactionDate;
+
+    await transaction.save();
+
+    return res.json({
+      success: true,
+      message: "Transaction updated successfully",
+      data: transaction,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * DELETE TRANSACTION
+ */
+const deleteTransaction = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId },
+    });
+
+    if (!transaction) {
+      throw new AppError("Transaction not found", 404);
+    }
+
+    await transaction.destroy();
+
+    return res.json({
+      success: true,
+      message: "Transaction deleted successfully",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createTransaction,
   getTransactions,
+  updateTransaction,
+  deleteTransaction,
 };
