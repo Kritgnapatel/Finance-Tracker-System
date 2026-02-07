@@ -7,27 +7,38 @@ const Budget = sequelize.define("Budget", {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
   },
+
   userId: {
     type: DataTypes.UUID,
     allowNull: false,
   },
+
   categoryId: {
     type: DataTypes.UUID,
     allowNull: false,
   },
+
   month: {
     type: DataTypes.STRING, // "02"
     allowNull: false,
   },
+
   year: {
     type: DataTypes.STRING, // "2026"
     allowNull: false,
   },
-  limitAmount: {
+
+  amount: {
     type: DataTypes.DECIMAL(12, 2),
     allowNull: false,
   },
-  alertSent: {
+
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
+  notified: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
