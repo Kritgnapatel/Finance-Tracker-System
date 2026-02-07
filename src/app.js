@@ -9,6 +9,7 @@ const transactionRoutes = require("./modules/transactions/transaction.routes");
 const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 const budgetRoutes = require("./modules/budgets/budget.routes");
 const investmentRoutes = require("./modules/investments/investment.routes");
+const passport = require("./config/passport");
 const app = express();
 
 app.use(cors());
@@ -23,6 +24,7 @@ app.use("/api/transactions", transactionRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/investments", investmentRoutes);
+app.use(passport.initialize());
 app.get("/health", (req, res) => {
   res.json({
     status: "ok",

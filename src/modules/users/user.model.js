@@ -14,6 +14,11 @@ const User = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    authProvider: {
+  type: DataTypes.STRING,
+  defaultValue: "local",
+},
+
 
     email: {
   type: DataTypes.STRING,
