@@ -3,6 +3,8 @@ const Transaction = require("./transaction.model");
 const Category = require("../categories/category.model");
 const AppError = require("../../utils/AppError");
 const { checkBudgetAndNotify } = require("../budgets/budget.controller");
+const { SUPPORTED_CURRENCIES, DEFAULT_CURRENCY } = require("../../constants/currencies");
+const User = require("../users/user.model");
 
 /**
  * CREATE TRANSACTION
@@ -14,12 +16,12 @@ const createTransaction = async (req, res, next) => {
       categoryId,
       type,
       amount,
-      currency = "INR",
+      currency,
       description,
       transactionDate,
     } = req.body;
 
-    // Validation
+    // Basic validation
     if (!categoryId || !type || amount === undefined || !transactionDate) {
       throw new AppError("Missing required transaction fields", 400);
     }
@@ -32,7 +34,7 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Amount cannot be zero", 400);
     }
 
-    // Category check (ownership + soft delete)
+    // Category ownership + soft delete check
     const category = await Category.findOne({
       where: {
         id: categoryId,
@@ -49,13 +51,25 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Transaction type does not match category type", 400);
     }
 
+    // 🔥 CURRENCY LOGIC (SELECTION-LEVEL)
+    let finalCurrency = currency;
+
+    if (!finalCurrency) {
+      const user = await User.findByPk(userId);
+      finalCurrency = user?.preferredCurrency || DEFAULT_CURRENCY;
+    }
+
+    if (!SUPPORTED_CURRENCIES.includes(finalCurrency)) {
+      throw new AppError("Unsupported currency", 400);
+    }
+
     // Create transaction
     const transaction = await Transaction.create({
       userId,
       categoryId,
       type,
       amount,
-      currency,
+      currency: finalCurrency,
       description,
       transactionDate,
     });
@@ -197,9 +211,35 @@ const deleteTransaction = async (req, res, next) => {
   }
 };
 
+const getTransactionById = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    const transaction = await Transaction.findOne({
+      where: {
+        id,
+        userId,
+      },
+    });
+
+    if (!transaction) {
+      throw new AppError("Transaction not found", 404);
+    }
+
+    res.status(200).json({
+      success: true,
+      data: transaction,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createTransaction,
   getTransactions,
+  getTransactionById, // 👈 ADD
   updateTransaction,
   deleteTransaction,
 };

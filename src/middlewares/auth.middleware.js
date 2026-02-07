@@ -1,22 +1,35 @@
 const jwt = require("jsonwebtoken");
+const AppError = require("../utils/AppError");
+const User = require("../modules/users/user.model");
 
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Authorization token missing" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
+const protect = async (req, res, next) => {
   try {
-   const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: decoded.sub };
+    let token;
 
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer")
+    ) {
+      token = req.headers.authorization.split(" ")[1];
+    }
+
+    if (!token) {
+      throw new AppError("Authorization token missing", 401);
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findByPk(decoded.sub || decoded.userId);
+
+    if (!user) {
+      throw new AppError("User no longer exists", 401);
+    }
+
+    req.user = { id: user.id };
     next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (err) {
+    next(err);
   }
 };
 
-module.exports = authMiddleware;
+module.exports = protect; // 🔥 DEFAULT EXPORT

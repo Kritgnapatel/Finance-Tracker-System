@@ -1,5 +1,10 @@
 const express = require("express");
-const authMiddleware = require("../../middlewares/auth.middleware");
+const router = express.Router();
+
+// 🔐 auth middleware (DEFAULT export)
+const protect = require("../../middlewares/auth.middleware");
+
+// 🎯 category controllers (NAMED exports)
 const {
   createCategory,
   getCategories,
@@ -7,11 +12,16 @@ const {
   deleteCategory,
 } = require("./category.controller");
 
-const router = express.Router();
+// CREATE
+router.post("/", protect, createCategory);
 
-router.post("/", authMiddleware, createCategory);
-router.get("/", authMiddleware, getCategories);
-router.put("/:id", authMiddleware, updateCategory);
-router.delete("/:id", authMiddleware, deleteCategory);
+// LIST
+router.get("/", protect, getCategories);
+
+// UPDATE
+router.put("/:id", protect, updateCategory);
+
+// DELETE (soft delete)
+router.delete("/:id", protect, deleteCategory);
 
 module.exports = router;

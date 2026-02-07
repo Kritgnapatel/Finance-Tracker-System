@@ -9,59 +9,43 @@ const Transaction = sequelize.define(
       defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     },
-
     userId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-
     categoryId: {
       type: DataTypes.UUID,
       allowNull: false,
     },
-
     type: {
       type: DataTypes.ENUM("income", "expense"),
       allowNull: false,
     },
-
     amount: {
-  type: DataTypes.DECIMAL(12, 2),
-  allowNull: false,
-  validate: {
-    notZero(value) {
-      if (Number(value) === 0) {
-        throw new Error("Amount cannot be zero");
-      }
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
     },
-  },
-},
-
     currency: {
-      type: DataTypes.STRING(3),
-      defaultValue: "INR",
+      type: DataTypes.ENUM("INR", "USD", "EUR"),
+      allowNull: false,
     },
-
     description: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
+      allowNull: true,
     },
-
     transactionDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    indexes: [
-    { fields: ["userId"] },
-    { fields: ["categoryId"] },
-    { fields: ["transactionDate"] },
-  ],
   },
   {
-    tableName: "transactions",
     timestamps: true,
-  },
-  
-
+    indexes: [
+      { fields: ["userId"] },
+      { fields: ["categoryId"] },
+      { fields: ["transactionDate"] },
+    ],
+  }
 );
 
 module.exports = Transaction;

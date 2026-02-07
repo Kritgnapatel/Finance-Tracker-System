@@ -9,7 +9,7 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: "postgres",
-    logging: false, // production-style
+    logging: false, // production-style logging off
   }
 );
 
@@ -19,20 +19,10 @@ const connectDB = async () => {
     await sequelize.authenticate();
     console.log("✅ Database connected");
 
-    // 🔥 Load models BEFORE associations
-    const Category = require("../modules/categories/category.model");
-    const Transaction = require("../modules/transactions/transaction.model");
+    // 🔥 IMPORTANT: sync schema (DEV MODE)
+    // This will add preferredCurrency, enums, etc.
+    await sequelize.sync({ alter: true });
 
-    // 🔗 Associations
-    Category.hasMany(Transaction, {
-      foreignKey: "categoryId",
-    });
-
-    Transaction.belongsTo(Category, {
-      foreignKey: "categoryId",
-    });
-
-    await sequelize.sync();
     console.log("📦 Database synced");
   } catch (error) {
     console.error("❌ Database connection failed:", error);

@@ -28,6 +28,12 @@ const User = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true, // Google OAuth users
     },
+    preferredCurrency: {
+  type: DataTypes.ENUM("INR", "USD", "EUR"),
+  allowNull: false,
+  defaultValue: "INR",
+},
+
   },
   {
     tableName: "users",
