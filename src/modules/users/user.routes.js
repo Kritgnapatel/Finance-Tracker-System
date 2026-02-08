@@ -1,10 +1,20 @@
 const express = require("express");
-const authMiddleware = require("../../middlewares/auth.middleware");
-const { getMe, updateMe } = require("./user.controller");
-
 const router = express.Router();
 
-router.get("/me", authMiddleware, getMe);
-router.put("/me", authMiddleware, updateMe);
+const protect = require("../../middlewares/auth.middleware");
+const {
+  getMe,
+  updateMe,
+  updatePreferredCurrency,
+} = require("./user.controller");
+
+// 🔐 Get current user
+router.get("/me", protect, getMe);
+
+// ✏️ Update name / email
+router.put("/me", protect, updateMe);
+
+// 💱 Update preferred currency
+router.put("/currency", protect, updatePreferredCurrency);
 
 module.exports = router;

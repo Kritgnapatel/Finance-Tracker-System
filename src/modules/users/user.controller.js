@@ -69,7 +69,39 @@ const updateMe = async (req, res, next) => {
   }
 };
 
+const updatePreferredCurrency = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { preferredCurrency } = req.body;
+
+    if (!preferredCurrency) {
+      throw new AppError("Preferred currency is required", 400);
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    user.preferredCurrency = preferredCurrency;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: "Preferred currency updated successfully",
+      data: {
+        preferredCurrency: user.preferredCurrency,
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 module.exports = {
   getMe,
   updateMe,
+  updatePreferredCurrency,
 };
+

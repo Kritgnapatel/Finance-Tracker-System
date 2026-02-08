@@ -1,42 +1,49 @@
 const { Op, fn, col, literal } = require("sequelize");
 const Transaction = require("../transactions/transaction.model");
 const Category = require("../categories/category.model");
+const User = require("../users/user.model");
+const { convertAmount } = require("../../utils/currency");
 
 /**
  * DASHBOARD SUMMARY
  * - totalIncome
  * - totalExpense
  * - savings
+ * (converted to user's preferred currency)
  */
 const getSummary = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const totals = await Transaction.findAll({
+    const user = await User.findByPk(userId);
+    const targetCurrency = user.preferredCurrency;
+
+    const rows = await Transaction.findAll({
       where: { userId },
-      attributes: [
-        "type",
-        [fn("SUM", col("amount")), "total"],
-      ],
-      group: ["type"],
+      attributes: ["type", "amount", "currency"],
     });
 
     let totalIncome = 0;
     let totalExpense = 0;
 
-    totals.forEach((row) => {
-      const type = row.get("type");
-      const total = Number(row.get("total")) || 0;
-      if (type === "income") totalIncome = total;
-      if (type === "expense") totalExpense = total;
+    rows.forEach((t) => {
+      const converted = convertAmount(
+        t.amount,
+        t.currency,
+        targetCurrency
+      );
+
+      if (t.type === "income") totalIncome += converted;
+      if (t.type === "expense") totalExpense += converted;
     });
 
     return res.json({
       success: true,
       data: {
-        totalIncome,
-        totalExpense,
-        savings: totalIncome - totalExpense,
+        currency: targetCurrency,
+        totalIncome: Number(totalIncome.toFixed(2)),
+        totalExpense: Number(totalExpense.toFixed(2)),
+        savings: Number((totalIncome - totalExpense).toFixed(2)),
       },
     });
   } catch (error) {
@@ -46,30 +53,55 @@ const getSummary = async (req, res, next) => {
 
 /**
  * CATEGORY-WISE BREAKDOWN
+ * (converted to user's preferred currency)
  */
 const getCategoryBreakdown = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const data = await Transaction.findAll({
+    const user = await User.findByPk(userId);
+    const targetCurrency = user.preferredCurrency;
+
+    const rows = await Transaction.findAll({
       where: { userId },
-      attributes: [
-        "categoryId",
-        [fn("SUM", col("amount")), "total"],
-      ],
+      attributes: ["amount", "currency"],
       include: [
         {
           model: Category,
-          attributes: ["name", "type"],
+          attributes: ["id", "name", "type"],
         },
       ],
-      group: ["categoryId", "Category.id"],
-      order: [[literal("total"), "DESC"]],
+    });
+
+    const result = {};
+
+    rows.forEach((t) => {
+      const key = t.Category.id;
+      const converted = convertAmount(
+        t.amount,
+        t.currency,
+        targetCurrency
+      );
+
+      if (!result[key]) {
+        result[key] = {
+          categoryId: t.Category.id,
+          name: t.Category.name,
+          type: t.Category.type,
+          total: 0,
+        };
+      }
+
+      result[key].total += converted;
     });
 
     return res.json({
       success: true,
-      data,
+      currency: targetCurrency,
+      data: Object.values(result).map((r) => ({
+        ...r,
+        total: Number(r.total.toFixed(2)),
+      })),
     });
   } catch (error) {
     next(error);
@@ -79,6 +111,7 @@ const getCategoryBreakdown = async (req, res, next) => {
 /**
  * MONTHLY SUMMARY
  * ?month=02&year=2026
+ * (converted to user's preferred currency)
  */
 const getMonthlySummary = async (req, res, next) => {
   try {
@@ -92,33 +125,35 @@ const getMonthlySummary = async (req, res, next) => {
       });
     }
 
-    // ✅ SAFE DATE STRINGS (POSTGRES FRIENDLY)
-    const startDate = `${year}-${month.padStart(2, "0")}-01`;
+    const user = await User.findByPk(userId);
+    const targetCurrency = user.preferredCurrency;
 
-    // last day of month
+    const startDate = `${year}-${month.padStart(2, "0")}-01`;
     const lastDay = new Date(year, month, 0).getDate();
     const endDate = `${year}-${month.padStart(2, "0")}-${lastDay}`;
 
-    const data = await Transaction.findAll({
+    const rows = await Transaction.findAll({
       where: {
         userId,
         transactionDate: {
           [Op.between]: [startDate, endDate],
         },
       },
-      attributes: [
-        "type",
-        [fn("SUM", col("amount")), "total"],
-      ],
-      group: ["type"],
+      attributes: ["type", "amount", "currency"],
     });
 
     let income = 0;
     let expense = 0;
 
-    data.forEach((row) => {
-      if (row.type === "income") income = Number(row.get("total")) || 0;
-      if (row.type === "expense") expense = Number(row.get("total")) || 0;
+    rows.forEach((t) => {
+      const converted = convertAmount(
+        t.amount,
+        t.currency,
+        targetCurrency
+      );
+
+      if (t.type === "income") income += converted;
+      if (t.type === "expense") expense += converted;
     });
 
     return res.json({
@@ -126,16 +161,16 @@ const getMonthlySummary = async (req, res, next) => {
       data: {
         month,
         year,
-        income,
-        expense,
-        savings: income - expense,
+        currency: targetCurrency,
+        income: Number(income.toFixed(2)),
+        expense: Number(expense.toFixed(2)),
+        savings: Number((income - expense).toFixed(2)),
       },
     });
   } catch (error) {
     next(error);
   }
 };
-
 
 module.exports = {
   getSummary,
