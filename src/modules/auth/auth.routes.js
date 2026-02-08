@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
+// STEP 1: Google redirect
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -12,7 +13,7 @@ router.get(
   })
 );
 
-// GOOGLE CALLBACK
+// STEP 2: Google callback
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
@@ -20,14 +21,13 @@ router.get(
     const token = jwt.sign(
       { sub: req.user.id },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    return res.json({
-      success: true,
-      message: "Google login successful",
-      token,
-    });
+    // ✅ REDIRECT TO FRONTEND
+    res.redirect(
+      `http://localhost:5000/dashboard.html?token=${token}`
+    );
   }
 );
 

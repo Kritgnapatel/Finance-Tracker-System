@@ -15,6 +15,7 @@ const errorHandler = require("./middlewares/error.middleware");
 
 const app = express();
 
+
 /* -------------------- GLOBAL MIDDLEWARES -------------------- */
 app.use(cors());
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/investments", investmentRoutes);
 
+app.use(express.static(path.join(__dirname, "../frontend")));
 /* -------------------- HEALTH CHECK -------------------- */
 app.get("/health", (req, res) => {
   res.json({

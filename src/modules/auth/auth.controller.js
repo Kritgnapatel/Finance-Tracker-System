@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const User = require("../users/user.model");
 const AppError = require("../../utils/AppError");
 
+const seedUserCategories = require("../../utils/seedUserCategories");
+
+
 /**
  * REGISTER USER
  */
@@ -31,7 +34,7 @@ const register = async (req, res, next) => {
       email,
       passwordHash: hashedPassword,
     });
-
+    await seedUserCategories(user.id);
     return res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -89,7 +92,9 @@ const login = async (req, res, next) => {
   }
 };
 
+
 module.exports = {
   register,
-  login,
+  login
 };
+

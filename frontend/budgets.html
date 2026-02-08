@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Budgets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h2>📊 Budgets</h2>
+
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="profile.html">Profile</a>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- CREATE / UPDATE BUDGET -->
+  <div class="card">
+    <h3>Set Monthly Budget</h3>
+
+    <div class="grid">
+      <select id="budgetCategory"></select>
+      <input id="budgetAmount" placeholder="Limit Amount">
+      <input id="budgetMonth" placeholder="MM">
+      <input id="budgetYear" placeholder="YYYY">
+    </div>
+
+    <br>
+    <button onclick="setBudget()">Save Budget</button>
+  </div>
+
+  <!-- INFO -->
+  <div class="card">
+    <h3>How it works</h3>
+    <p class="muted">
+      You will receive an email alert when expenses exceed the set limit for a category.
+    </p>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/budgets.js"></script>
+</body>
+</html>

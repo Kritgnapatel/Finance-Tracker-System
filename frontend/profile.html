@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Profile</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h2>👤 Profile</h2>
+
+  <div class="nav">
+    <a href="dashboard.html">Dashboard</a>
+    <a href="transactions.html">Transactions</a>
+    <a href="budgets.html">Budgets</a>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- USER INFO -->
+  <div class="card">
+    <h3>User Details</h3>
+    <p><strong>Name:</strong> <span id="name"></span></p>
+    <p><strong>Email:</strong> <span id="email"></span></p>
+  </div>
+
+  <!-- CURRENCY -->
+  <div class="card">
+    <h3>Preferred Currency</h3>
+
+    <select id="currency">
+      <option value="INR">INR</option>
+      <option value="USD">USD</option>
+      <option value="EUR">EUR</option>
+    </select>
+
+    <br><br>
+    <button onclick="updateCurrency()">Update Currency</button>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/profile.js"></script>
+</body>
+</html>

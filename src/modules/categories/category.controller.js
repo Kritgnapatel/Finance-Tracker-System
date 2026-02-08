@@ -1,6 +1,28 @@
 const Category = require("./category.model");
 const AppError = require("../../utils/AppError");
+const seedCategoriesForUser = require("../../utils/seedCategories");
 
+const DEFAULT_CATEGORIES = [
+  { name: "Salary", type: "income" },
+  { name: "Freelance", type: "income" },
+  { name: "Food", type: "expense" },
+  { name: "Transport", type: "expense" },
+  { name: "Shopping", type: "expense" },
+  { name: "Rent", type: "expense" },
+];
+
+const seedMyCategories = async (req, res, next) => {
+  try {
+    await seedCategoriesForUser(req.user.id);
+
+    res.json({
+      success: true,
+      message: "Categories seeded successfully",
+    });
+  } catch (err) {
+    next(err);
+  }
+};
 /**
  * CREATE CATEGORY
  */
@@ -40,20 +62,29 @@ const getCategories = async (req, res, next) => {
   try {
     const userId = req.user.id;
 
-    const categories = await Category.findAll({
-      where: {
-        userId,
-        isDeleted: false,
-      },
-      order: [["createdAt", "DESC"]],
+    let categories = await Category.findAll({
+      where: { userId, isDeleted: false },
+      order: [["createdAt", "ASC"]],
     });
 
-    return res.json({
+    // 🔥 AUTO SEED if empty
+    if (categories.length === 0) {
+      const seeded = await Category.bulkCreate(
+        DEFAULT_CATEGORIES.map(cat => ({
+          ...cat,
+          userId,
+        }))
+      );
+
+      categories = seeded;
+    }
+
+    res.json({
       success: true,
       data: categories,
     });
-  } catch (error) {
-    next(error);
+  } catch (err) {
+    next(err);
   }
 };
 /**
@@ -132,5 +163,6 @@ module.exports = {
   getCategories,
   updateCategory,
   deleteCategory,
+  seedMyCategories,
 };
 

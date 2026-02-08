@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+  <h2>📊 Finance Dashboard</h2>
+
+  <div class="nav">
+    <a href="transactions.html">Transactions</a>
+    <a href="budgets.html">Budgets</a>
+    <a href="profile.html">Profile</a>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="stats">
+  <div class="stat income">
+    <h3>Total Income</h3>
+    <p id="totalIncome">0</p>
+  </div>
+
+  <div class="stat expense">
+    <h3>Total Expense</h3>
+    <p id="totalExpense">0</p>
+  </div>
+
+  <div class="stat savings">
+    <h3>Savings</h3>
+    <p id="savings">0</p>
+  </div>
+</div>
+
+
+  <!-- MONTHLY REPORT -->
+  <div class="card">
+    <h3>📅 Monthly Report</h3>
+
+    <div class="grid">
+      <input id="month" placeholder="MM (eg. 02)">
+      <input id="year" placeholder="YYYY (eg. 2026)">
+    </div>
+
+    <br>
+    <button onclick="loadMonthly()">Load Report</button>
+
+    <p class="muted" id="monthly"></p>
+  </div>
+
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>

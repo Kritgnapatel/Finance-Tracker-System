@@ -30,9 +30,13 @@ const Category = sequelize.define(
       defaultValue: false,
     },
   },
-  {
+    {
     tableName: "categories",
     timestamps: true,
+    indexes: [
+      { fields: ["userId"] },
+      { fields: ["type"] },
+    ],
   }
 );
 

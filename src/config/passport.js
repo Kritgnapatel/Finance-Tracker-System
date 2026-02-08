@@ -1,8 +1,8 @@
 const passport = require("passport");
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
-const jwt = require("jsonwebtoken");
-
 const User = require("../modules/users/user.model");
+const seedUserCategories = require("../utils/seedUserCategories");
+
 
 passport.use(
   new GoogleStrategy(
@@ -14,16 +14,18 @@ passport.use(
     async (accessToken, refreshToken, profile, done) => {
       try {
         const email = profile.emails[0].value;
+        const name = profile.displayName;
 
         let user = await User.findOne({ where: { email } });
 
         if (!user) {
           user = await User.create({
-            name: profile.displayName,
+            name,
             email,
-            password: "GOOGLE_AUTH", // dummy, never used
             authProvider: "google",
+            passwordHash: null,
           });
+          await seedUserCategories(user.id); // 🔥 IMPORTANT
         }
 
         return done(null, user);

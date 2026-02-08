@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Finance Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="center">
+  <h2>💰 Finance Tracker</h2>
+
+  <input id="loginEmail" placeholder="Email">
+  <input id="loginPassword" type="password" placeholder="Password">
+
+  <button onclick="login()">Login</button>
+
+  <hr style="margin: 20px 0">
+
+  <input id="registerName" placeholder="Name">
+  <input id="registerEmail" placeholder="Email">
+  <input id="registerPassword" type="password" placeholder="Password">
+
+  <button onclick="register()">Register</button>
+
+  <br><br>
+
+  <button class="google-btn" onclick="googleLogin()">
+    Continue with Google
+  </button>
+
+  <p class="footer-text">
+    Secure • Budget Tracking • Multi-Currency
+  </p>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script>
+function googleLogin() {
+  window.location.href = "http://localhost:5000/api/auth/google";
+}
+</script>
+
+</body>
+</html>
