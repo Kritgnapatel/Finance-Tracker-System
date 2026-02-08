@@ -17,27 +17,35 @@
     <button onclick="logout()">Logout</button>
   </div>
 
-  <!-- CREATE / UPDATE BUDGET -->
   <div class="card">
     <h3>Set Monthly Budget</h3>
 
-    <div class="grid">
-      <select id="budgetCategory"></select>
-      <input id="budgetAmount" placeholder="Limit Amount">
-      <input id="budgetMonth" placeholder="MM">
-      <input id="budgetYear" placeholder="YYYY">
-    </div>
+    <select id="budgetCategory"></select>
 
-    <br>
+    <input
+      type="number"
+      id="budgetLimit"
+      placeholder="Limit Amount"
+    />
+
+    <input
+      type="text"
+      id="budgetMonth"
+      placeholder="MM"
+    />
+
+    <input
+      type="text"
+      id="budgetYear"
+      placeholder="YYYY"
+    />
+
     <button onclick="setBudget()">Save Budget</button>
   </div>
 
-  <!-- INFO -->
-  <div class="card">
-    <h3>How it works</h3>
-    <p class="muted">
-      You will receive an email alert when expenses exceed the set limit for a category.
-    </p>
+  <div class="card muted">
+    <strong>How it works</strong><br/>
+    You will receive an email alert when expenses exceed this limit.
   </div>
 
 </div>

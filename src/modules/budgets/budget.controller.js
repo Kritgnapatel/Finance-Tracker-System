@@ -2,18 +2,21 @@ const { Op } = require("sequelize");
 const Budget = require("./budget.model");
 const Transaction = require("../transactions/transaction.model");
 const Category = require("../categories/category.model");
+const User = require("../users/user.model");
 const AppError = require("../../utils/AppError");
 const sendEmail = require("../../utils/sendEmail");
 
 /**
- * CREATE / UPDATE BUDGET (UPSERT)
+ * CREATE / UPDATE BUDGET
  */
 const upsertBudget = async (req, res, next) => {
   try {
     const userId = req.user.id;
-    const { categoryId, amount, month, year, email } = req.body;
+    const { categoryId, limitAmount, month, year } = req.body;
 
-    if (!categoryId || !amount || !month || !year || !email) {
+    const amount = limitAmount;
+
+    if (!categoryId || amount === undefined || !month || !year) {
       throw new AppError("Missing budget fields", 400);
     }
 
@@ -22,39 +25,49 @@ const upsertBudget = async (req, res, next) => {
     }
 
     const category = await Category.findOne({
-      where: { id: categoryId, userId, isDeleted: false },
+      where: {
+        id: categoryId,
+        userId,
+        type: "expense",
+        isDeleted: false,
+      },
     });
 
-    if (!category || category.type !== "expense") {
+    if (!category) {
       throw new AppError("Invalid expense category", 400);
     }
 
-    const [budget, created] = await Budget.findOrCreate({
-      where: { userId, categoryId, month, year },
-      defaults: { amount, email },
-    });
-
-    if (!created) {
-      budget.amount = amount;
-      budget.email = email;
-      budget.notified = false; // reset alert
-      await budget.save();
+    // 🔑 EMAIL SOURCE — USER TABLE
+    const user = await User.findByPk(userId);
+    if (!user || !user.email) {
+      throw new AppError("User email not found", 400);
     }
 
-    res.status(created ? 201 : 200).json({
+    const [budget] = await Budget.upsert(
+      {
+        userId,
+        categoryId,
+        month,
+        year,
+        amount,
+        email: user.email, // ✅ FIXED
+        notified: false,
+      },
+      { returning: true }
+    );
+
+    res.json({
       success: true,
-      message: created
-        ? "Budget created successfully"
-        : "Budget updated successfully",
+      message: "Budget saved successfully",
       data: budget,
     });
-  } catch (e) {
-    next(e);
+  } catch (err) {
+    next(err);
   }
 };
 
 /**
- * INTERNAL — CHECK BUDGET + SEND EMAIL
+ * INTERNAL — CHECK BUDGET & SEND EMAIL
  */
 const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
   const budget = await Budget.findOne({
@@ -63,9 +76,11 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
 
   if (!budget || budget.notified) return;
 
-  const startDate = new Date(`${year}-${month}-01`);
-  const endDate = new Date(startDate);
-  endDate.setMonth(endDate.getMonth() + 1);
+  const user = await User.findByPk(userId);
+  if (!user) return;
+
+  const startDate = `${year}-${month}-01`;
+  const endDate = new Date(year, Number(month), 0);
 
   const totalSpent = await Transaction.sum("amount", {
     where: {
@@ -73,23 +88,25 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
       categoryId,
       type: "expense",
       transactionDate: {
-        [Op.gte]: startDate,
-        [Op.lt]: endDate,
+        [Op.between]: [startDate, endDate],
       },
     },
   });
 
-  if (Math.abs(totalSpent || 0) >= Number(budget.amount)) {
+  const spent = Math.abs(totalSpent || 0);
+
+  if (spent >= budget.amount) {
     await sendEmail({
       to: budget.email,
       subject: "⚠️ Budget Limit Exceeded",
       text: `
-Hi,
+Hi ${user.name},
 
-Your budget for this category has been exceeded.
+Your monthly budget limit has been exceeded.
 
-Budget: ₹${budget.amount}
-Spent: ₹${Math.abs(totalSpent)}
+Category: ${categoryId}
+Limit: ₹${budget.amount}
+Spent: ₹${spent}
 
 — Finance Tracker
 `,
