@@ -11,13 +11,13 @@ require("./modules/investments/investment.model");
 
 const PORT = process.env.PORT || 5000;
 
-// ✅ RUNTIME-SAFE uploads path (VERY IMPORTANT)
-const uploadsPath = path.join(process.cwd(), "uploads", "receipts");
+// // ✅ RUNTIME-SAFE uploads path (VERY IMPORTANT)
+// const uploadsPath = path.join(process.cwd(), "uploads", "receipts");
 
-// 🔥 Create folders ONCE at server boot
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath, { recursive: true });
-}
+// // 🔥 Create folders ONCE at server boot
+// if (!fs.existsSync(uploadsPath)) {
+//   fs.mkdirSync(uploadsPath, { recursive: true });
+// }
 
 // 🔹 Connect DB then start server
 connectDB().then(() => {

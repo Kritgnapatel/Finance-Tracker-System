@@ -22,7 +22,8 @@ app.use(passport.initialize());
 
 /* -------------------- STATIC FILES -------------------- */
 // Serve uploaded receipts
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 
 /* -------------------- ROUTES -------------------- */
 app.use("/api/auth", authRoutes);
