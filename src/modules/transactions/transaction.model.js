@@ -37,6 +37,11 @@ const Transaction = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    receiptUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
   },
   {
     timestamps: true,

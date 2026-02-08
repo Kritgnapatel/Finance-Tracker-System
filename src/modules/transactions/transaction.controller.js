@@ -9,6 +9,39 @@ const User = require("../users/user.model");
 /**
  * CREATE TRANSACTION
  */
+const uploadReceiptToTransaction = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+
+    if (!req.file) {
+      throw new AppError("Receipt file is required", 400);
+    }
+
+    const transaction = await Transaction.findOne({
+      where: { id, userId },
+    });
+
+    if (!transaction) {
+      throw new AppError("Transaction not found", 404);
+    }
+
+    transaction.receiptUrl = `/uploads/receipts/${req.file.filename}`;
+    await transaction.save();
+
+    res.json({
+      success: true,
+      message: "Receipt uploaded successfully",
+      data: {
+        transactionId: transaction.id,
+        receiptUrl: transaction.receiptUrl,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const createTransaction = async (req, res, next) => {
   try {
     const userId = req.user.id;
@@ -237,6 +270,7 @@ const getTransactionById = async (req, res, next) => {
 };
 
 module.exports = {
+  uploadReceiptToTransaction,
   createTransaction,
   getTransactions,
   getTransactionById, // 👈 ADD
