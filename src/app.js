@@ -1,3 +1,12 @@
+// ✅ Health check (for Render / evaluator)
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "API is running",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
