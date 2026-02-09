@@ -24,12 +24,14 @@ router.get(
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    // ✅ REDIRECT TO FRONTEND
+    const frontendURL = process.env.FRONTEND_URL;
+
     res.redirect(
-      `http://localhost:5000/dashboard.html?token=${token}`
+      `${frontendURL}/dashboard.html?token=${token}`
     );
   }
 );
+
 
 router.post("/register", register);
 router.post("/login", login);
