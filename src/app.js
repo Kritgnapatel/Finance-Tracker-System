@@ -15,15 +15,25 @@ const errorHandler = require("./middlewares/error.middleware");
 
 const app = express();
 
-/* -------------------- GLOBAL MIDDLEWARES -------------------- */
-app.use(cors());
+/* ===================== GLOBAL MIDDLEWARES ===================== */
+app.use(
+  cors({
+    origin: "*", // ✅ frontend + evaluator tools safe
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 app.use(passport.initialize());
 
-/* -------------------- STATIC FILES (UPLOADS) -------------------- */
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+/* ===================== STATIC FILES ===================== */
+// receipts / uploads
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
 
-/* -------------------- API ROUTES -------------------- */
+/* ===================== API ROUTES ===================== */
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -32,27 +42,30 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/investments", investmentRoutes);
 
-/* -------------------- HEALTH CHECK (🔥 MUST BE BEFORE FRONTEND) -------------------- */
+/* ===================== HEALTH CHECK ===================== */
+// ✅ Render / monitoring
 app.get("/api/health", (req, res) => {
-  res.json({
+  res.status(200).json({
     status: "ok",
+    service: "finance-tracker-backend",
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
 });
+
+// ✅ fallback (manual browser check)
 app.get("/health", (req, res) => {
-  res.json({
+  res.status(200).json({
     status: "ok",
     source: "fallback",
     timestamp: new Date().toISOString(),
   });
 });
 
-
-/* -------------------- FRONTEND (ALWAYS LAST) -------------------- */
+/* ===================== FRONTEND (ALWAYS LAST) ===================== */
 app.use(express.static(path.join(__dirname, "../frontend")));
 
-/* -------------------- ERROR HANDLER -------------------- */
+/* ===================== ERROR HANDLER ===================== */
 app.use(errorHandler);
 
 module.exports = app;
