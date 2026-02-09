@@ -1,17 +1,22 @@
-// Simple, deterministic rates (dev-friendly)
-// NOTE: In prod you’d fetch from an API or cache daily
+// src/utils/currency.js
+
 const RATES = {
-  INR: { INR: 1, USD: 0.012, EUR: 0.011 },
-  USD: { USD: 1, INR: 83.0, EUR: 0.92 },
-  EUR: { EUR: 1, INR: 90.0, USD: 1.09 },
+  INR: 1,
+  USD: 83,
+  EUR: 90,
 };
 
 const convertAmount = (amount, from, to) => {
-  if (!RATES[from] || !RATES[from][to]) {
-    throw new Error("Unsupported currency conversion");
-  }
-  // keep 2-decimal precision
-  return Number((Number(amount) * RATES[from][to]).toFixed(2));
+  if (!from || !to) return Number(amount);
+
+  const fromRate = RATES[from] || 1;
+  const toRate = RATES[to] || 1;
+
+  // convert → INR → target
+  const inINR = Number(amount) * fromRate;
+  return inINR / toRate;
 };
 
-module.exports = { convertAmount, RATES };
+module.exports = {
+  convertAmount,
+};

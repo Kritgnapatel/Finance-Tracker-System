@@ -45,16 +45,16 @@ const uploadReceiptToTransaction = async (req, res, next) => {
 const createTransaction = async (req, res, next) => {
   try {
     const userId = req.user.id;
+
     const {
       categoryId,
       type,
       amount,
-      currency,
+      currency, // ❗ no default here
       description,
       transactionDate,
     } = req.body;
 
-    // Basic validation
     if (!categoryId || !type || amount === undefined || !transactionDate) {
       throw new AppError("Missing required transaction fields", 400);
     }
@@ -67,7 +67,15 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Amount cannot be zero", 400);
     }
 
-    // Category ownership + soft delete check
+    // 🔥 get user preferred currency
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    const finalCurrency = currency || user.preferredCurrency;
+
+    // Category check
     const category = await Category.findOne({
       where: {
         id: categoryId,
@@ -84,39 +92,25 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Transaction type does not match category type", 400);
     }
 
-    // 🔥 CURRENCY LOGIC (SELECTION-LEVEL)
-    let finalCurrency = currency;
-
-    if (!finalCurrency) {
-      const user = await User.findByPk(userId);
-      finalCurrency = user?.preferredCurrency || DEFAULT_CURRENCY;
-    }
-
-    if (!SUPPORTED_CURRENCIES.includes(finalCurrency)) {
-      throw new AppError("Unsupported currency", 400);
-    }
-
-    // Create transaction
     const transaction = await Transaction.create({
       userId,
       categoryId,
       type,
       amount,
-      currency: finalCurrency,
+      currency: finalCurrency, // ✅ FIXED
       description,
       transactionDate,
     });
 
-    // 🔔 Budget check (ONLY for expenses)
+    // budget check
     if (type === "expense") {
       const dateObj = new Date(transactionDate);
       const month = String(dateObj.getMonth() + 1).padStart(2, "0");
       const year = String(dateObj.getFullYear());
-
       await checkBudgetAndNotify(userId, categoryId, month, year);
     }
 
-    return res.status(201).json({
+    res.status(201).json({
       success: true,
       message: "Transaction added successfully",
       data: transaction,

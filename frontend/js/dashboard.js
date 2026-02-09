@@ -1,5 +1,6 @@
 // frontend/js/dashboard.js
 
+
 async function loadSummary() {
   try {
     const res = await apiRequest("/dashboard/summary");

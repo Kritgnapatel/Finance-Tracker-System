@@ -13,13 +13,11 @@ const { convertAmount } = require("../../utils/currency");
  */
 const getSummary = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-
-    const user = await User.findByPk(userId);
-    const targetCurrency = user.preferredCurrency;
+    const user = await User.findByPk(req.user.id);
+    const targetCurrency = user.preferredCurrency || "INR";
 
     const rows = await Transaction.findAll({
-      where: { userId },
+      where: { userId: req.user.id },
       attributes: ["type", "amount", "currency"],
     });
 
@@ -27,17 +25,12 @@ const getSummary = async (req, res, next) => {
     let totalExpense = 0;
 
     rows.forEach((t) => {
-      const converted = convertAmount(
-        t.amount,
-        t.currency,
-        targetCurrency
-      );
-
+      const converted = convertAmount(t.amount, t.currency, targetCurrency);
       if (t.type === "income") totalIncome += converted;
       if (t.type === "expense") totalExpense += converted;
     });
 
-    return res.json({
+    res.json({
       success: true,
       data: {
         currency: targetCurrency,
@@ -46,11 +39,10 @@ const getSummary = async (req, res, next) => {
         savings: Number((totalIncome - totalExpense).toFixed(2)),
       },
     });
-  } catch (error) {
-    next(error);
+  } catch (e) {
+    next(e);
   }
 };
-
 /**
  * CATEGORY-WISE BREAKDOWN
  * (converted to user's preferred currency)

@@ -64,18 +64,25 @@ async function addTransaction() {
     alert("All fields required");
     return;
   }
+  const currency =
+    localStorage.getItem("preferredCurrency") || "INR";
+
+  // // 🔥 GET preferred currency from profile
+  // const profile = await apiRequest("/users/me");
 
   await apiRequest("/transactions", "POST", {
     categoryId,
     type,
     amount,
+    currency, // ✅ IMPORTANT
     transactionDate: date,
     description,
   });
 
-  alert("Transaction added successfully");
+  alert("Transaction added");
   loadTransactions();
 }
+
 
 /**
  * INIT

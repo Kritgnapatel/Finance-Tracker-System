@@ -6,17 +6,21 @@ const AppError = require("../../utils/AppError");
  */
 const getMe = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-
-    const user = await User.findByPk(userId, {
-      attributes: ["id", "name", "email", "createdAt"],
+    const user = await User.findByPk(req.user.id, {
+      attributes: [
+        "id",
+        "name",
+        "email",
+        "preferredCurrency",
+        "createdAt",
+      ],
     });
 
     if (!user) {
       throw new AppError("User not found", 404);
     }
 
-    return res.json({
+    res.json({
       success: true,
       data: user,
     });
@@ -27,22 +31,23 @@ const getMe = async (req, res, next) => {
 
 /**
  * UPDATE CURRENT USER PROFILE
+ * (name / email / preferredCurrency)
  */
 const updateMe = async (req, res, next) => {
   try {
-    const userId = req.user.id;
-    const { name, email } = req.body;
+    const { name, email, preferredCurrency } = req.body;
 
-    if (!name && !email) {
+    if (!name && !email && !preferredCurrency) {
       throw new AppError("Nothing to update", 400);
     }
 
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(req.user.id);
     if (!user) {
       throw new AppError("User not found", 404);
     }
 
-    // Email uniqueness check
+    if (name) user.name = name;
+
     if (email && email !== user.email) {
       const exists = await User.findOne({ where: { email } });
       if (exists) {
@@ -51,17 +56,23 @@ const updateMe = async (req, res, next) => {
       user.email = email;
     }
 
-    if (name) user.name = name;
+    if (preferredCurrency) {
+      if (!["INR", "USD", "EUR"].includes(preferredCurrency)) {
+        throw new AppError("Invalid currency", 400);
+      }
+      user.preferredCurrency = preferredCurrency;
+    }
 
     await user.save();
 
-    return res.json({
+    res.json({
       success: true,
       message: "Profile updated successfully",
       data: {
         id: user.id,
         name: user.name,
         email: user.email,
+        preferredCurrency: user.preferredCurrency,
       },
     });
   } catch (error) {
@@ -69,39 +80,7 @@ const updateMe = async (req, res, next) => {
   }
 };
 
-const updatePreferredCurrency = async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-    const { preferredCurrency } = req.body;
-
-    if (!preferredCurrency) {
-      throw new AppError("Preferred currency is required", 400);
-    }
-
-    const user = await User.findByPk(userId);
-    if (!user) {
-      throw new AppError("User not found", 404);
-    }
-
-    user.preferredCurrency = preferredCurrency;
-    await user.save();
-
-    res.json({
-      success: true,
-      message: "Preferred currency updated successfully",
-      data: {
-        preferredCurrency: user.preferredCurrency,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-
 module.exports = {
   getMe,
   updateMe,
-  updatePreferredCurrency,
 };
-

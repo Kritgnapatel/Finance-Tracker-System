@@ -1,20 +1,18 @@
 const express = require("express");
-const router = express.Router();
-
 const protect = require("../../middlewares/auth.middleware");
+
+// 🔥 CONTROLLER IMPORT — THIS MUST MATCH EXACT EXPORT
 const {
   getMe,
   updateMe,
-  updatePreferredCurrency,
 } = require("./user.controller");
 
-// 🔐 Get current user
-router.get("/me", protect, getMe);
+const router = express.Router();
 
-// ✏️ Update name / email
+// PROFILE
+router.get("/me", protect, getMe);
 router.put("/me", protect, updateMe);
 
-// 💱 Update preferred currency
-router.put("/currency", protect, updatePreferredCurrency);
+// 🔥 CURRENCY ROUTE (THIS WAS BREAKING)
 
 module.exports = router;
