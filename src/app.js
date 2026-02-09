@@ -16,15 +16,6 @@ const errorHandler = require("./middlewares/error.middleware");
 
 const app = express();
 
-// ✅ Health check (for Render / evaluator)
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "API is running",
-    timestamp: new Date().toISOString(),
-  });
-});
-
 /* -------------------- GLOBAL MIDDLEWARES -------------------- */
 app.use(cors());
 app.use(express.json());
