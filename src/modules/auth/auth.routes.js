@@ -24,10 +24,10 @@ router.get(
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    const frontendURL = process.env.FRONTEND_URL;
+    //const frontendURL = process.env.FRONTEND_URL;
 
     res.redirect(
-      `${frontendURL}/dashboard.html?token=${token}`
+      `${process.env.FRONTEND_URL}/dashboard.html?token=${token}`
     );
   }
 );
