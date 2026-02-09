@@ -7,17 +7,17 @@ if (!localStorage.getItem("token")) {
 }
 
 /**
- * LOAD CATEGORIES (FIXED)
+ * LOAD CATEGORIES (❗UNCHANGED)
  */
 async function loadCategories() {
   const res = await apiRequest("/categories");
 
-  console.log("Categories API response:", res); // 🔍 debug
+  console.log("Categories API response:", res);
 
   const select = document.getElementById("categorySelect");
   select.innerHTML = `<option value="">Select Category</option>`;
 
-  // ✅ IMPORTANT FIX HERE
+  // ❗ SAME AS YOUR WORKING VERSION
   res.data.forEach(cat => {
     const opt = document.createElement("option");
     opt.value = cat.id;
@@ -27,7 +27,7 @@ async function loadCategories() {
 }
 
 /**
- * LOAD TRANSACTIONS
+ * LOAD TRANSACTIONS (➕ receipt support added)
  */
 async function loadTransactions() {
   const container = document.getElementById("transactionsList");
@@ -39,19 +39,38 @@ async function loadTransactions() {
   res.data.forEach(tx => {
     const div = document.createElement("div");
     div.className = "tx-card";
+
     div.innerHTML = `
-      <strong>${tx.type.toUpperCase()}</strong> — ₹${tx.amount}
+      <strong>${tx.type.toUpperCase()}</strong>
+      — ${tx.amount} ${tx.currency}
       <br/>
       ${tx.description || ""}
       <br/>
       <small>${tx.transactionDate}</small>
+
+      <br/><br/>
+
+      ${
+        tx.receiptUrl
+          ? `<a href="http://localhost:5000${tx.receiptUrl}" target="_blank">
+               📎 View Receipt
+             </a>`
+          : `<input type="file" onchange="uploadReceipt('${tx.id}', this)" />`
+      }
+
+      <br/><br/>
+
+      <button class="danger" onclick="deleteTransaction('${tx.id}')">
+        🗑 Delete
+      </button>
     `;
+
     container.appendChild(div);
   });
 }
 
 /**
- * ADD TRANSACTION
+ * ADD TRANSACTION (❗UNCHANGED LOGIC)
  */
 async function addTransaction() {
   const categoryId = document.getElementById("categorySelect").value;
@@ -64,17 +83,15 @@ async function addTransaction() {
     alert("All fields required");
     return;
   }
+
   const currency =
     localStorage.getItem("preferredCurrency") || "INR";
-
-  // // 🔥 GET preferred currency from profile
-  // const profile = await apiRequest("/users/me");
 
   await apiRequest("/transactions", "POST", {
     categoryId,
     type,
     amount,
-    currency, // ✅ IMPORTANT
+    currency,
     transactionDate: date,
     description,
   });
@@ -83,6 +100,25 @@ async function addTransaction() {
   loadTransactions();
 }
 
+/**
+ * 📎 UPLOAD RECEIPT (NEW)
+ */
+async function uploadReceipt(transactionId, input) {
+  if (!input.files || !input.files[0]) return;
+
+  const formData = new FormData();
+  formData.append("receipt", input.files[0]);
+
+  await apiRequest(
+    `/transactions/${transactionId}/receipt`,
+    "POST",
+    formData,
+    true
+  );
+
+  alert("Receipt uploaded");
+  loadTransactions();
+}
 
 /**
  * INIT
