@@ -3,7 +3,6 @@ const GoogleStrategy = require("passport-google-oauth20").Strategy;
 const User = require("../modules/users/user.model");
 const seedUserCategories = require("../utils/seedUserCategories");
 
-
 passport.use(
   new GoogleStrategy(
     {
@@ -13,6 +12,11 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
+        // 🛡 SAFE guards
+        if (!profile.emails || !profile.emails.length) {
+          return done(new Error("No email received from Google"), null);
+        }
+
         const email = profile.emails[0].value;
         const name = profile.displayName;
 
@@ -24,8 +28,11 @@ passport.use(
             email,
             authProvider: "google",
             passwordHash: null,
+            preferredCurrency: "INR", // ✅ default
           });
-          await seedUserCategories(user.id); // 🔥 IMPORTANT
+
+          // 🔥 seed default categories for new Google user
+          await seedUserCategories(user.id);
         }
 
         return done(null, user);
