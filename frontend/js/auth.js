@@ -47,6 +47,4 @@ async function register() {
   alert("Registration successful. Please login.");
 }
 
-function googleLogin() {
-  window.location.href = "http://localhost:5000/api/auth/google";
-}
+
