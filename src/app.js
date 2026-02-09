@@ -40,6 +40,14 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok",
+    source: "fallback",
+    timestamp: new Date().toISOString(),
+  });
+});
+
 
 /* -------------------- FRONTEND (ALWAYS LAST) -------------------- */
 app.use(express.static(path.join(__dirname, "../frontend")));
