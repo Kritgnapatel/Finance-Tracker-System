@@ -37,7 +37,12 @@
 <script src="js/auth.js"></script>
 <script>
 function googleLogin() {
-  window.location.href = "http://localhost:5000/api/auth/google";
+  const API_BASE =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://finance-tracker-backend-q8oa.onrender.com";
+
+  window.location.href = `${API_BASE}/api/auth/google`;
 }
 </script>
 
