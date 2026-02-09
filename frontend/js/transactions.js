@@ -27,7 +27,7 @@ async function loadCategories() {
 }
 
 /**
- * LOAD TRANSACTIONS (➕ receipt support added)
+ * LOAD TRANSACTIONS (➕ receipt + delete support)
  */
 async function loadTransactions() {
   const container = document.getElementById("transactionsList");
@@ -70,7 +70,7 @@ async function loadTransactions() {
 }
 
 /**
- * ADD TRANSACTION (❗UNCHANGED LOGIC)
+ * ADD TRANSACTION (❗UNCHANGED)
  */
 async function addTransaction() {
   const categoryId = document.getElementById("categorySelect").value;
@@ -101,7 +101,19 @@ async function addTransaction() {
 }
 
 /**
- * 📎 UPLOAD RECEIPT (NEW)
+ * 🗑 DELETE TRANSACTION (🔥 FIX ADDED)
+ */
+async function deleteTransaction(id) {
+  const ok = confirm("Are you sure you want to delete this transaction?");
+  if (!ok) return;
+
+  await apiRequest(`/transactions/${id}`, "DELETE");
+  alert("Transaction deleted");
+  loadTransactions();
+}
+
+/**
+ * 📎 UPLOAD RECEIPT
  */
 async function uploadReceipt(transactionId, input) {
   if (!input.files || !input.files[0]) return;

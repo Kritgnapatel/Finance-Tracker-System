@@ -19,22 +19,21 @@
 
   <!-- SUMMARY CARDS -->
   <div class="stats">
-  <div class="stat income">
-    <h3>Total Income</h3>
-    <p id="totalIncome">0</p>
-  </div>
+    <div class="stat income">
+      <h3>Total Income</h3>
+      <p id="totalIncome">0</p>
+    </div>
 
-  <div class="stat expense">
-    <h3>Total Expense</h3>
-    <p id="totalExpense">0</p>
-  </div>
+    <div class="stat expense">
+      <h3>Total Expense</h3>
+      <p id="totalExpense">0</p>
+    </div>
 
-  <div class="stat savings">
-    <h3>Savings</h3>
-    <p id="savings">0</p>
+    <div class="stat savings">
+      <h3>Savings</h3>
+      <p id="savings">0</p>
+    </div>
   </div>
-</div>
-
 
   <!-- MONTHLY REPORT -->
   <div class="card">
@@ -54,6 +53,29 @@
 </div>
 
 <script src="js/api.js"></script>
+
+<script>
+/**
+ * 🔥 GOOGLE LOGIN TOKEN HANDLING
+ * This fixes 401 Unauthorized
+ */
+const params = new URLSearchParams(window.location.search);
+const tokenFromGoogle = params.get("token");
+
+if (tokenFromGoogle) {
+  localStorage.setItem("token", tokenFromGoogle);
+
+  // clean URL (important polish)
+  window.history.replaceState({}, document.title, "dashboard.html");
+}
+
+// 🔐 auth guard
+if (!localStorage.getItem("token")) {
+  alert("Unauthorized");
+  window.location.href = "index.html";
+}
+</script>
+
 <script src="js/dashboard.js"></script>
 </body>
 </html>
