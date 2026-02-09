@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
@@ -21,12 +20,10 @@ app.use(cors());
 app.use(express.json());
 app.use(passport.initialize());
 
-/* -------------------- STATIC FILES -------------------- */
-// Serve uploaded receipts
+/* -------------------- STATIC FILES (UPLOADS) -------------------- */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-
-/* -------------------- ROUTES -------------------- */
+/* -------------------- API ROUTES -------------------- */
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/categories", categoryRoutes);
@@ -35,9 +32,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/investments", investmentRoutes);
 
-app.use(express.static(path.join(__dirname, "../frontend")));
-/* -------------------- HEALTH CHECK -------------------- */
-app.get("/health", (req, res) => {
+/* -------------------- HEALTH CHECK (🔥 MUST BE BEFORE FRONTEND) -------------------- */
+app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
     uptime: process.uptime(),
@@ -45,7 +41,10 @@ app.get("/health", (req, res) => {
   });
 });
 
-/* -------------------- ERROR HANDLER (ALWAYS LAST) -------------------- */
+/* -------------------- FRONTEND (ALWAYS LAST) -------------------- */
+app.use(express.static(path.join(__dirname, "../frontend")));
+
+/* -------------------- ERROR HANDLER -------------------- */
 app.use(errorHandler);
 
 module.exports = app;
