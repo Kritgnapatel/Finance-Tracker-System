@@ -73,31 +73,42 @@ async function loadTransactions() {
  * ADD TRANSACTION (❗UNCHANGED)
  */
 async function addTransaction() {
-  const categoryId = document.getElementById("categorySelect").value;
-  const type = document.getElementById("typeSelect").value;
-  const amount = document.getElementById("amountInput").value;
-  const date = document.getElementById("dateInput").value;
-  const description = document.getElementById("descInput").value;
+  try {
+    const categoryId = document.getElementById("categorySelect").value;
+    const type = document.getElementById("typeSelect").value;
+    const amount = document.getElementById("amountInput").value;
+    const date = document.getElementById("dateInput").value;
+    const description = document.getElementById("descInput").value;
 
-  if (!categoryId || !type || !amount || !date) {
-    alert("All fields required");
-    return;
+    if (!categoryId || !type || !amount || !date) {
+      alert("All fields required");
+      return;
+    }
+
+    const currency =
+      localStorage.getItem("preferredCurrency") || "INR";
+
+    // 🔥 WAIT for backend confirmation
+    const res = await apiRequest("/transactions", "POST", {
+      categoryId,
+      type,
+      amount,
+      currency,
+      transactionDate: date,
+      description,
+    });
+
+    console.log("Transaction created:", res);
+
+    // ✅ Update UI ONLY after success
+    await loadTransactions();
+
+    alert("Transaction added successfully");
+
+  } catch (error) {
+    console.error("Add transaction failed:", error);
+    alert(error.message || "Failed to add transaction");
   }
-
-  const currency =
-    localStorage.getItem("preferredCurrency") || "INR";
-
-  await apiRequest("/transactions", "POST", {
-    categoryId,
-    type,
-    amount,
-    currency,
-    transactionDate: date,
-    description,
-  });
-
-  alert("Transaction added");
-  loadTransactions();
 }
 
 /**

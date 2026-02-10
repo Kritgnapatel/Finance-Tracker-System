@@ -13,7 +13,6 @@ const upsertBudget = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { categoryId, limitAmount, month, year } = req.body;
-
     const amount = limitAmount;
 
     if (!categoryId || amount === undefined || !month || !year) {
@@ -25,21 +24,15 @@ const upsertBudget = async (req, res, next) => {
     }
 
     const category = await Category.findOne({
-      where: {
-        id: categoryId,
-        userId,
-        type: "expense",
-        isDeleted: false,
-      },
+      where: { id: categoryId, userId, type: "expense", isDeleted: false },
     });
 
     if (!category) {
       throw new AppError("Invalid expense category", 400);
     }
 
-    // 🔑 EMAIL SOURCE — USER TABLE
     const user = await User.findByPk(userId);
-    if (!user || !user.email) {
+    if (!user?.email) {
       throw new AppError("User email not found", 400);
     }
 
@@ -50,7 +43,7 @@ const upsertBudget = async (req, res, next) => {
         month,
         year,
         amount,
-        email: user.email, // ✅ FIXED
+        email: user.email,
         notified: false,
       },
       { returning: true }
@@ -67,53 +60,68 @@ const upsertBudget = async (req, res, next) => {
 };
 
 /**
- * INTERNAL — CHECK BUDGET & SEND EMAIL
+ * 🔔 CHECK BUDGET & SEND EMAIL
  */
 const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
-  const budget = await Budget.findOne({
-    where: { userId, categoryId, month, year },
-  });
+  try {
+    const budget = await Budget.findOne({
+      where: { userId, categoryId, month, year },
+    });
 
-  if (!budget || budget.notified) return;
+    if (!budget || budget.notified) return;
 
-  const user = await User.findByPk(userId);
-  if (!user) return;
+    const user = await User.findByPk(userId);
+    const category = await Category.findByPk(categoryId);
 
-  const startDate = `${year}-${month}-01`;
-  const endDate = new Date(year, Number(month), 0);
+    if (!user || !category) return;
 
-  const totalSpent = await Transaction.sum("amount", {
-    where: {
-      userId,
-      categoryId,
-      type: "expense",
-      transactionDate: {
-        [Op.between]: [startDate, endDate],
+    // ✅ Correct date range
+    const startDate = new Date(`${year}-${month}-01`);
+    const endDate = new Date(startDate);
+    endDate.setMonth(endDate.getMonth() + 1);
+
+    const totalSpent = await Transaction.sum("amount", {
+      where: {
+        userId,
+        categoryId,
+        type: "expense",
+        transactionDate: {
+          [Op.gte]: startDate,
+          [Op.lt]: endDate,
+        },
       },
-    },
-  });
+    });
 
-  const spent = Math.abs(totalSpent || 0);
+    const spent = Math.abs(totalSpent || 0);
 
-  if (spent >= budget.amount) {
-    await sendEmail({
-      to: budget.email,
-      subject: "⚠️ Budget Limit Exceeded",
-      text: `
+    console.log("💰 Budget check:", {
+      category: category.name,
+      spent,
+      limit: budget.amount,
+    });
+
+    if (spent >= budget.amount) {
+      await sendEmail({
+        to: budget.email,
+        subject: "⚠️ Budget Limit Exceeded",
+        text: `
 Hi ${user.name},
 
 Your monthly budget limit has been exceeded.
 
-Category: ${categoryId}
+Category: ${category.name}
 Limit: ₹${budget.amount}
 Spent: ₹${spent}
 
 — Finance Tracker
-`,
-    });
+        `,
+      });
 
-    budget.notified = true;
-    await budget.save();
+      budget.notified = true;
+      await budget.save();
+    }
+  } catch (err) {
+    console.error("❌ Budget email failed:", err.message);
   }
 };
 
