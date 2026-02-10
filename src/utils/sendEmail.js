@@ -7,14 +7,14 @@ const getTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",
-      port: 465,
-      secure: true, // 🔥 REQUIRED on Render
+      port: 587,
+      secure: false, // TLS
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS, // Gmail App Password
       },
       tls: {
-        rejectUnauthorized: false, // 🔥 Render fix
+        rejectUnauthorized: false,
       },
     });
   }
@@ -35,7 +35,6 @@ const sendEmail = async ({ to, subject, text }) => {
     console.log("📧 Email sent successfully to:", to);
   } catch (err) {
     console.error("❌ Email send failed:", err.message);
-    // DO NOT throw — transaction should not rollback
   }
 };
 
