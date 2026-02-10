@@ -55,24 +55,19 @@
 <script src="js/api.js"></script>
 
 <script>
-/**
- * 🔥 GOOGLE LOGIN TOKEN HANDLING
- * This fixes 401 Unauthorized
- */
 const params = new URLSearchParams(window.location.search);
 const tokenFromGoogle = params.get("token");
 
 if (tokenFromGoogle) {
   localStorage.setItem("token", tokenFromGoogle);
 
-  // clean URL (important polish)
-  window.history.replaceState({}, document.title, "dashboard.html");
+  // clean URL (no token leakage)
+  window.history.replaceState({}, document.title, "/dashboard.html");
 }
 
 // 🔐 auth guard
 if (!localStorage.getItem("token")) {
-  alert("Unauthorized");
-  window.location.href = "index.html";
+  window.location.href = "/";
 }
 </script>
 
