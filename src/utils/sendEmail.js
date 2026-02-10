@@ -6,10 +6,15 @@ let transporter;
 const getTransporter = () => {
   if (!transporter) {
     transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // 🔥 REQUIRED on Render
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS, // Gmail App Password
+      },
+      tls: {
+        rejectUnauthorized: false, // 🔥 Render fix
       },
     });
   }
@@ -27,10 +32,10 @@ const sendEmail = async ({ to, subject, text }) => {
       text,
     });
 
-    console.log("📧 Email sent to:", to);
+    console.log("📧 Email sent successfully to:", to);
   } catch (err) {
-    // 🔥 DO NOT throw — background failure allowed
     console.error("❌ Email send failed:", err.message);
+    // DO NOT throw — transaction should not rollback
   }
 };
 

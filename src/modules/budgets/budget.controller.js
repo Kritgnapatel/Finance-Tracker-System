@@ -64,6 +64,9 @@ const upsertBudget = async (req, res, next) => {
  */
 const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
   try {
+    // 🔒 normalize month
+    month = String(month).padStart(2, "0");
+
     const budget = await Budget.findOne({
       where: { userId, categoryId, month, year },
     });
@@ -74,31 +77,35 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
     const category = await Category.findByPk(categoryId);
     if (!user || !category) return;
 
-    const startDate = new Date(`${year}-${month}-01`);
-    const endDate = new Date(startDate);
-    endDate.setMonth(endDate.getMonth() + 1);
+    // ✅ STRING DATE RANGE (Postgres-safe)
+    const startDate = `${year}-${month}-01`;
+    const lastDay = new Date(year, Number(month), 0).getDate();
+    const endDate = `${year}-${month}-${lastDay}`;
 
-    const totalSpent = await Transaction.sum("amount", {
-      where: {
-        userId,
-        categoryId,
-        type: "expense",
-        transactionDate: {
-          [Op.gte]: startDate,
-          [Op.lt]: endDate,
+    const totalSpent =
+      (await Transaction.sum("amount", {
+        where: {
+          userId,
+          categoryId,
+          type: "expense",
+          transactionDate: {
+            [Op.between]: [startDate, endDate],
+          },
         },
-      },
-    });
+      })) || 0;
 
-    const spent = Math.abs(totalSpent || 0);
+    const spent = Math.abs(totalSpent);
 
     console.log("📊 Budget Check:", {
       category: category.name,
       spent,
       limit: budget.amount,
+      month,
+      year,
     });
 
-    if (spent >= budget.amount) {
+    // 🚨 LIMIT EXCEEDED
+    if (spent >= Number(budget.amount)) {
       await sendEmail({
         to: budget.email,
         subject: "⚠️ Budget Limit Exceeded",
@@ -117,11 +124,15 @@ Spent: ₹${spent}
 
       budget.notified = true;
       await budget.save();
+
+      console.log("📧 Budget alert email sent");
     }
   } catch (err) {
+    // ❗ NEVER throw — transaction should succeed even if mail fails
     console.error("❌ Budget notify error:", err.message);
   }
 };
+
 
 
 
