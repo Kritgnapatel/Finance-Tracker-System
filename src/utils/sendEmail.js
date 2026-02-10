@@ -10,8 +10,8 @@ const getTransporter = () => {
       port: 587,
       secure: false,
       auth: {
-        user: process.env.EMAIL_USER,      // your gmail
-        pass: process.env.EMAIL_PASS,      // app password
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
       },
     });
   }
@@ -20,19 +20,30 @@ const getTransporter = () => {
 
 const sendEmail = async ({ to, subject, text }) => {
   try {
+    if (!to) {
+      console.error("❌ Email skipped: recipient missing");
+      return;
+    }
+
     const mailer = getTransporter();
 
-    await mailer.sendMail({
+    await mailer.verify();
+    console.log("✅ SMTP verified");
+
+    const info = await mailer.sendMail({
       from: `"Finance Tracker" <${process.env.EMAIL_USER}>`,
-      to,                    // ✅ ACTUAL LOGGED-IN USER EMAIL
+      to,
       subject,
       text,
     });
 
-    console.log("📧 Budget email sent to:", to);
+    console.log("📧 Email sent:", {
+      to,
+      messageId: info.messageId,
+    });
   } catch (err) {
-    console.error("❌ Email failed:", err.message);
-    throw err;
+    // ❗ NEVER throw — budget logic should not break transaction
+    console.error("❌ Email send failed:", err.message);
   }
 };
 

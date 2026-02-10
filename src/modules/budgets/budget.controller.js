@@ -13,13 +13,12 @@ const upsertBudget = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { categoryId, limitAmount, month, year } = req.body;
-    const amount = limitAmount;
 
-    if (!categoryId || amount === undefined || !month || !year) {
+    if (!categoryId || !limitAmount || !month || !year) {
       throw new AppError("Missing budget fields", 400);
     }
 
-    if (Number(amount) <= 0) {
+    if (Number(limitAmount) <= 0) {
       throw new AppError("Budget amount must be greater than zero", 400);
     }
 
@@ -40,11 +39,11 @@ const upsertBudget = async (req, res, next) => {
       {
         userId,
         categoryId,
-        month,
+        month: String(month).padStart(2, "0"),
         year,
-        amount,
+        amount: limitAmount,
         email: user.email,
-        notified: false,
+        notified: false, // 🔥 reset on every save
       },
       { returning: true }
     );
@@ -64,20 +63,18 @@ const upsertBudget = async (req, res, next) => {
  */
 const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
   try {
-    // 🔒 normalize month
     month = String(month).padStart(2, "0");
 
     const budget = await Budget.findOne({
       where: { userId, categoryId, month, year },
     });
 
-    if (!budget || budget.notified) return;
+    if (!budget) return;
 
     const user = await User.findByPk(userId);
     const category = await Category.findByPk(categoryId);
     if (!user || !category) return;
 
-    // ✅ STRING DATE RANGE (Postgres-safe)
     const startDate = `${year}-${month}-01`;
     const lastDay = new Date(year, Number(month), 0).getDate();
     const endDate = `${year}-${month}-${lastDay}`;
@@ -94,18 +91,20 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
         },
       })) || 0;
 
-    const spent = Math.abs(totalSpent);
+    const spent = Math.abs(Number(totalSpent));
+    const limit = Number(budget.amount);
 
     console.log("📊 Budget Check:", {
+      user: user.email,
       category: category.name,
       spent,
-      limit: budget.amount,
+      limit,
       month,
       year,
     });
 
-    // 🚨 LIMIT EXCEEDED
-    if (spent >= Number(budget.amount)) {
+    // 🔥 FINAL FIX: REMOVE notified BLOCK
+    if (spent >= limit) {
       await sendEmail({
         to: user.email,
         subject: "⚠️ Budget Limit Exceeded",
@@ -115,25 +114,21 @@ Hi ${user.name},
 Your monthly budget limit has been exceeded.
 
 Category: ${category.name}
-Limit: ₹${budget.amount}
+Limit: ₹${limit}
 Spent: ₹${spent}
 
 — Finance Tracker
         `,
       });
 
-      budget.notified = true;
-      await budget.save();
-
-      console.log("📧 Budget alert email sent");
+      console.log("📧 Budget alert email sent to:", user.email);
     }
+
+    console.log("📧 Budget check completed");
   } catch (err) {
-    // ❗ NEVER throw — transaction should succeed even if mail fails
     console.error("❌ Budget notify error:", err.message);
   }
 };
-
-
 
 
 module.exports = {
