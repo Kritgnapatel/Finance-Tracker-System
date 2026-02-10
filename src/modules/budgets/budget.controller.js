@@ -72,10 +72,8 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
 
     const user = await User.findByPk(userId);
     const category = await Category.findByPk(categoryId);
-
     if (!user || !category) return;
 
-    // ✅ Correct date range
     const startDate = new Date(`${year}-${month}-01`);
     const endDate = new Date(startDate);
     endDate.setMonth(endDate.getMonth() + 1);
@@ -94,7 +92,7 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
 
     const spent = Math.abs(totalSpent || 0);
 
-    console.log("💰 Budget check:", {
+    console.log("📊 Budget Check:", {
       category: category.name,
       spent,
       limit: budget.amount,
@@ -121,9 +119,11 @@ Spent: ₹${spent}
       await budget.save();
     }
   } catch (err) {
-    console.error("❌ Budget email failed:", err.message);
+    console.error("❌ Budget notify error:", err.message);
   }
 };
+
+
 
 module.exports = {
   upsertBudget,

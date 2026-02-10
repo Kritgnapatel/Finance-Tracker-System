@@ -9,7 +9,7 @@ const getTransporter = () => {
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // 🔐 App password
+        pass: process.env.EMAIL_PASS, // Gmail App Password
       },
     });
   }
@@ -29,8 +29,8 @@ const sendEmail = async ({ to, subject, text }) => {
 
     console.log("📧 Email sent to:", to);
   } catch (err) {
+    // 🔥 DO NOT throw — background failure allowed
     console.error("❌ Email send failed:", err.message);
-    throw err;
   }
 };
 

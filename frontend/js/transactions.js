@@ -6,18 +6,21 @@ if (!localStorage.getItem("token")) {
   window.location.href = "index.html";
 }
 
+// 🌐 backend base (localhost vs render)
+const BACKEND_BASE =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://finance-tracker-backend-2cyr.onrender.com";
+
 /**
- * LOAD CATEGORIES (❗UNCHANGED)
+ * LOAD CATEGORIES
  */
 async function loadCategories() {
   const res = await apiRequest("/categories");
 
-  console.log("Categories API response:", res);
-
   const select = document.getElementById("categorySelect");
   select.innerHTML = `<option value="">Select Category</option>`;
 
-  // ❗ SAME AS YOUR WORKING VERSION
   res.data.forEach(cat => {
     const opt = document.createElement("option");
     opt.value = cat.id;
@@ -27,7 +30,7 @@ async function loadCategories() {
 }
 
 /**
- * LOAD TRANSACTIONS (➕ receipt + delete support)
+ * LOAD TRANSACTIONS
  */
 async function loadTransactions() {
   const container = document.getElementById("transactionsList");
@@ -40,19 +43,21 @@ async function loadTransactions() {
     const div = document.createElement("div");
     div.className = "tx-card";
 
+    const date = new Date(tx.transactionDate).toLocaleDateString();
+
     div.innerHTML = `
       <strong>${tx.type.toUpperCase()}</strong>
-      — ${tx.amount} ${tx.currency}
+      — ${Number(tx.amount)} ${tx.currency}
       <br/>
       ${tx.description || ""}
       <br/>
-      <small>${tx.transactionDate}</small>
+      <small>${date}</small>
 
       <br/><br/>
 
       ${
         tx.receiptUrl
-          ? `<a href="http://localhost:5000${tx.receiptUrl}" target="_blank">
+          ? `<a href="${BACKEND_BASE}${tx.receiptUrl}" target="_blank">
                📎 View Receipt
              </a>`
           : `<input type="file" onchange="uploadReceipt('${tx.id}', this)" />`
@@ -70,7 +75,7 @@ async function loadTransactions() {
 }
 
 /**
- * ADD TRANSACTION (❗UNCHANGED)
+ * ADD TRANSACTION
  */
 async function addTransaction() {
   try {
@@ -88,8 +93,7 @@ async function addTransaction() {
     const currency =
       localStorage.getItem("preferredCurrency") || "INR";
 
-    // 🔥 WAIT for backend confirmation
-    const res = await apiRequest("/transactions", "POST", {
+    await apiRequest("/transactions", "POST", {
       categoryId,
       type,
       amount,
@@ -98,11 +102,7 @@ async function addTransaction() {
       description,
     });
 
-    console.log("Transaction created:", res);
-
-    // ✅ Update UI ONLY after success
     await loadTransactions();
-
     alert("Transaction added successfully");
 
   } catch (error) {
@@ -112,19 +112,17 @@ async function addTransaction() {
 }
 
 /**
- * 🗑 DELETE TRANSACTION (🔥 FIX ADDED)
+ * DELETE TRANSACTION
  */
 async function deleteTransaction(id) {
-  const ok = confirm("Are you sure you want to delete this transaction?");
-  if (!ok) return;
+  if (!confirm("Are you sure you want to delete this transaction?")) return;
 
   await apiRequest(`/transactions/${id}`, "DELETE");
-  alert("Transaction deleted");
-  loadTransactions();
+  await loadTransactions();
 }
 
 /**
- * 📎 UPLOAD RECEIPT
+ * UPLOAD RECEIPT
  */
 async function uploadReceipt(transactionId, input) {
   if (!input.files || !input.files[0]) return;
@@ -140,7 +138,7 @@ async function uploadReceipt(transactionId, input) {
   );
 
   alert("Receipt uploaded");
-  loadTransactions();
+  await loadTransactions();
 }
 
 /**

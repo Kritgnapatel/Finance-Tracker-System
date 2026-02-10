@@ -50,7 +50,7 @@ const createTransaction = async (req, res, next) => {
       categoryId,
       type,
       amount,
-      currency, // ❗ no default here
+      currency,
       description,
       transactionDate,
     } = req.body;
@@ -92,33 +92,45 @@ const createTransaction = async (req, res, next) => {
       throw new AppError("Transaction type does not match category type", 400);
     }
 
+    // ✅ CREATE TRANSACTION
     const transaction = await Transaction.create({
       userId,
       categoryId,
       type,
       amount,
-      currency: finalCurrency, // ✅ FIXED
+      currency: finalCurrency,
       description,
       transactionDate,
     });
 
-    // budget check
-    if (type === "expense") {
-      const dateObj = new Date(transactionDate);
-      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
-      const year = String(dateObj.getFullYear());
-      await checkBudgetAndNotify(userId, categoryId, month, year);
-    }
-
+    // ✅ SEND RESPONSE IMMEDIATELY (CRITICAL)
     res.status(201).json({
       success: true,
       message: "Transaction added successfully",
       data: transaction,
     });
+
+    // 🔥 BACKGROUND BUDGET CHECK (NON-BLOCKING)
+    if (type === "expense") {
+      const dateObj = new Date(transactionDate);
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const year = String(dateObj.getFullYear());
+
+      // ❗ fire-and-forget
+      checkBudgetAndNotify(userId, categoryId, month, year)
+        .then(() => {
+          console.log("📧 Budget check completed");
+        })
+        .catch((err) => {
+          console.error("⚠️ Budget notify failed:", err.message);
+        });
+    }
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /**
  * LIST TRANSACTIONS (WITH FILTERS)
