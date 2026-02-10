@@ -52,10 +52,13 @@ const frontendPath = path.join(process.cwd(), "frontend");
 // serve static frontend
 app.use(express.static(frontendPath));
 
-// fallback → index.html (SPA behaviour)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
+/* ===================== FRONTEND FALLBACK ===================== */
+app.get(/.*/, (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "../frontend/index.html")
+  );
 });
+
 
 /* ===================== ERROR HANDLER ===================== */
 app.use(errorHandler);

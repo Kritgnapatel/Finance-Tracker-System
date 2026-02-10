@@ -26,8 +26,12 @@ router.get(
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    // ✅ SAME DOMAIN redirect (NO localhost, NO env confusion)
-    res.redirect(`/dashboard.html?token=${token}`);
+    const frontendURL =
+      process.env.FRONTEND_URL || "http://localhost:5000";
+
+    res.redirect(
+      `${frontendURL}/dashboard.html?token=${token}`
+    );
   }
 );
 
