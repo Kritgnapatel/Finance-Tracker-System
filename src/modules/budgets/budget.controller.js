@@ -107,7 +107,7 @@ const checkBudgetAndNotify = async (userId, categoryId, month, year) => {
     // 🚨 LIMIT EXCEEDED
     if (spent >= Number(budget.amount)) {
       await sendEmail({
-        to: budget.email,
+        to: process.env.EMAIL_TEST_RECEIVER || user.email,
         subject: "⚠️ Budget Limit Exceeded",
         text: `
 Hi ${user.name},
