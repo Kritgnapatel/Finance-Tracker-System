@@ -1,40 +1,21 @@
 // src/utils/sendEmail.js
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-let transporter;
-
-const getTransporter = () => {
-  if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false, // TLS
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Gmail App Password
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
-  return transporter;
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async ({ to, subject, text }) => {
   try {
-    const mailer = getTransporter();
-
-    await mailer.sendMail({
-      from: `"Finance Tracker" <${process.env.EMAIL_USER}>`,
+    const response = await resend.emails.send({
+      from: process.env.EMAIL_FROM, // Finance Tracker <onboarding@resend.dev>
       to,
       subject,
       text,
     });
 
-    console.log("📧 Email sent successfully to:", to);
+    console.log("📧 Email sent successfully:", response.id);
   } catch (err) {
     console.error("❌ Email send failed:", err.message);
+    throw err;
   }
 };
 
