@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 
 const router = express.Router();
 
-// STEP 1: Google redirect
+/* ===================== GOOGLE LOGIN ===================== */
+
+// STEP 1: redirect to Google
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -24,15 +26,12 @@ router.get(
       { expiresIn: process.env.JWT_EXPIRES_IN }
     );
 
-    //const frontendURL = process.env.FRONTEND_URL;
-
-    res.redirect(
-      `${process.env.FRONTEND_URL}/dashboard.html?token=${token}`
-    );
+    // ✅ SAME DOMAIN redirect (NO localhost, NO env confusion)
+    res.redirect(`/dashboard.html?token=${token}`);
   }
 );
 
-
+/* ===================== EMAIL/PASSWORD ===================== */
 router.post("/register", register);
 router.post("/login", login);
 

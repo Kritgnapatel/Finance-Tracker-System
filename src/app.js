@@ -16,22 +16,12 @@ const errorHandler = require("./middlewares/error.middleware");
 const app = express();
 
 /* ===================== GLOBAL MIDDLEWARES ===================== */
-app.use(
-  cors({
-    origin: "*", // ✅ frontend + evaluator tools safe
-    credentials: true,
-  })
-);
-
+app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
 app.use(passport.initialize());
 
-/* ===================== STATIC FILES ===================== */
-// receipts / uploads
-app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
-);
+/* ===================== STATIC UPLOADS ===================== */
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 /* ===================== API ROUTES ===================== */
 app.use("/api/auth", authRoutes);
@@ -42,15 +32,9 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/budgets", budgetRoutes);
 app.use("/api/investments", investmentRoutes);
 
-/* ===================== HEALTH CHECK ===================== */
-// ✅ Render / monitoring
+/* ===================== HEALTH ===================== */
 app.get("/api/health", (req, res) => {
-  res.status(200).json({
-    status: "ok",
-    service: "finance-tracker-backend",
-    uptime: process.uptime(),
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ status: "ok" });
 });
 
 // ✅ fallback (manual browser check)
@@ -62,8 +46,16 @@ app.get("/health", (req, res) => {
   });
 });
 
-/* ===================== FRONTEND (ALWAYS LAST) ===================== */
-app.use(express.static(path.join(__dirname, "../frontend")));
+/* ===================== FRONTEND (🔥 VERY IMPORTANT) ===================== */
+const frontendPath = path.join(process.cwd(), "frontend");
+
+// serve static frontend
+app.use(express.static(frontendPath));
+
+// fallback → index.html (SPA behaviour)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
+});
 
 /* ===================== ERROR HANDLER ===================== */
 app.use(errorHandler);
