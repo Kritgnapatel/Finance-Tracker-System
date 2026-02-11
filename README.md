@@ -1,92 +1,108 @@
-# 💰 Finance Tracker – Full Stack Backend-Focused Application
+# 💰 Finance Tracker  
+### Backend-Focused Full Stack Application (Production-Oriented)
 
-A **complete finance management system** built with a strong emphasis on **backend engineering, system design, and real-world features**.  
-The frontend is intentionally minimal and clean, designed only to **demonstrate backend functionality clearly**.
+A **production-style personal finance management system** built with a **strong backend-first approach**.  
+The project focuses on **clean architecture, secure authentication, data integrity, scalability, and real-world use cases**.
 
-> ⚠️ This project is evaluated primarily on **backend design, logic, and robustness**, not UI complexity.
+> 🎯 **Evaluation Focus:**  
+> This project is designed to be evaluated primarily on **backend engineering quality**, not UI complexity.  
+> The frontend is intentionally minimal and exists only to **demonstrate API functionality**.
 
 ---
 
 ## 📌 Problem Statement
 
-Managing personal finances requires:
-- Tracking income & expenses
-- Categorizing transactions
-- Monitoring budgets
-- Supporting multiple currencies
-- Storing transaction proofs (receipts)
-- Secure authentication
+Personal finance management is not just about tracking expenses. A real-world solution must handle:
 
-This project solves all of the above with a **scalable, production-style backend architecture**.
+- Secure user authentication
+- Income & expense tracking
+- Category-based budgeting
+- Multi-currency transactions
+- File uploads (receipts)
+- Automated alerts & notifications
+- Accurate financial aggregation
+
+Most beginner projects stop at CRUD.  
+This project goes further by implementing **real-world backend systems** such as:
+- Budget overrun detection
+- Email notifications
+- Currency normalization
+- Secure file handling
+- Ownership-based data access
 
 ---
 
-## 🚀 Features (Complete)
+## 🚀 Key Features
 
 ### 🔐 Authentication & Security
-- User registration & login (JWT-based)
-- **Google OAuth 2.0 login**
-- Secure protected routes using middleware
-- Password hashing using bcrypt
-- Token-based authorization for all APIs
+- User registration & login using **JWT**
+- **Google OAuth 2.0** authentication (Passport.js)
+- Password hashing using **bcrypt**
+- Protected routes using middleware
+- Token-based authorization for every API
+- Ownership validation for all user resources
 
 ---
 
-### 👤 User Profile
-- View user profile details
-- Update name & email
-- **Set preferred currency (INR / USD / EUR)**
+### 👤 User Profile Management
+- View & update profile details
+- Update name and email
+- Set **preferred currency**:
+  - INR
+  - USD
+  - EUR
 - Preferred currency persists across sessions
-- Used automatically in transactions & dashboard
+- Automatically applied across dashboard & reports
 
 ---
 
 ### 💸 Transactions Management
-- Add **income & expense** transactions
-- Each transaction includes:
+- Add **income and expense** transactions
+- Each transaction supports:
+  - Amount (decimal-safe)
   - Category
-  - Amount
   - Currency
   - Date
   - Description
-- Delete transactions securely
-- Strict validation & edge case handling
-- Decimal precision preserved
+- Secure deletion with ownership checks
+- Strong validation & edge-case handling
+- Precision-safe calculations (no rounding bugs)
 
 ---
 
-### 📂 Categories
-- Income & Expense categories
-- User-specific categories
-- **Default categories seeding**
-- Safe deletion handling
-- Category ownership enforced
+### 📂 Category System
+- Separate income & expense categories
+- **User-specific categories**
+- Default category seeding for new users
+- Safe deletion with dependency checks
+- Prevents cross-user category access
 
 ---
 
 ### 📎 Receipt Upload System
-- Upload receipts for transactions
-- Stored on server using Multer
-- Linked to individual transactions
-- Secure file handling
-- Receipts viewable via URL
+- Upload transaction receipts
+- Server-side storage using **Multer**
+- Receipts linked to transactions
+- Secure file naming & access
+- Receipt retrieval via protected URLs
 
 ---
 
 ### 🎯 Budgeting System
-- Set monthly budgets per expense category
-- Automatic **budget overrun detection**
-- Budget resets monthly
-- Prevents invalid budget creation
-- Supports updates (upsert logic)
+- Monthly budgets per expense category
+- **Automatic budget overrun detection**
+- Monthly reset logic
+- Budget upsert (create/update safely)
+- Prevents invalid or duplicate budgets
 
 ---
 
 ### 📧 Notification System
-- **Email notifications** when budget exceeds limit
-- Uses Nodemailer with Gmail App Password
+- Email alerts when budget exceeds limit
+- Implemented using **Nodemailer**
+- Gmail App Password authentication
 - Triggered automatically on expense creation
-- Prevents duplicate alerts for same period
+- Duplicate alerts prevented per month/category
 
 ---
 
@@ -95,35 +111,35 @@ This project solves all of the above with a **scalable, production-style backend
   - INR
   - USD
   - EUR
-- Each transaction stores its own currency
-- **Dashboard automatically converts values**
-- Conversion handled server-side
+- Each transaction stores its original currency
+- **Server-side currency normalization**
+- Dashboard shows all values in preferred currency
 - Accurate aggregation across mixed currencies
 
 ---
 
 ### 📊 Dashboard & Reporting
-- Total Income
-- Total Expense
-- Savings calculation
-- Monthly income vs expense report
-- Category-wise breakdown
-- All values shown in **user’s preferred currency**
-- Real-time updates after transactions
+- Total income
+- Total expenses
+- Net savings calculation
+- Monthly income vs expense summary
+- Category-wise expense breakdown
+- Real-time recalculation after every transaction
+- Currency-normalized reporting
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
-- **Node.js**
-- **Express.js**
-- **PostgreSQL**
-- **Sequelize ORM**
-- **JWT Authentication**
-- **Passport.js (Google OAuth)**
-- **Multer (File Uploads)**
-- **Nodemailer (Email Notifications)**
+- Node.js
+- Express.js
+- PostgreSQL
+- Sequelize ORM
+- JWT Authentication
+- Passport.js (Google OAuth)
+- Multer (File uploads)
+- Nodemailer (Email notifications)
 
 ### Frontend (Minimal Demo)
 - HTML
@@ -131,9 +147,55 @@ This project solves all of the above with a **scalable, production-style backend
 - Vanilla JavaScript
 - Fetch API
 
-> Frontend exists only to demonstrate backend functionality clearly.
+> ⚠️ Frontend intentionally kept minimal to highlight backend engineering.
 
 ---
 
-## 🧱 Project Architecture
+## 🧪 Data Integrity & Validation
+- Input validation on all APIs
+- Authorization checks for every resource
+- Decimal-safe monetary calculations
+- Referential integrity enforced
+- Secure file upload handling
+- Graceful error responses
+
+---
+
+## 🔐 Security Practices
+- Password hashing (bcrypt)
+- JWT-based stateless auth
+- OAuth token validation
+- Route-level authorization
+- Secure file handling
+- Environment variable configuration
+
+---
+
+## 📈 Scalability & Extensibility
+Designed to be easily extended with:
+- Additional currencies
+- Advanced analytics
+- Monthly reports (PDF)
+- Admin dashboards
+- Microservices migration
+
+---
+
+## 🎯 Why This Project Stands Out
+- Not a CRUD-only app
+- Real-world backend features
+- Strong system design
+- Production-style logic
+- Interview-ready project
+
+This project demonstrates **backend engineering maturity**, not just framework usage.
+
+---
+
+## 👨‍💻 Author
+**Kritgna Patel**  
+Backend-focused developer  
+B.Tech | IIIT Pune
+
+---
 
