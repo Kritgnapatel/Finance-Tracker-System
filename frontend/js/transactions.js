@@ -37,41 +37,71 @@ async function loadTransactions() {
   if (!container) return;
 
   const res = await apiRequest("/transactions");
-  container.innerHTML = "";
+
+  if (!res.data || res.data.length === 0) {
+    container.innerHTML = "<p class='text-secondary text-sm p-4'>No transactions found.</p>";
+    return;
+  }
+
+  let html = `
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Amount</th>
+          <th>Receipt</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
 
   res.data.forEach(tx => {
-    const div = document.createElement("div");
-    div.className = "tx-card";
+    const date = new Date(tx.transactionDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+    const isExpense = tx.type === 'expense';
+    const amountVal = Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-    const date = new Date(tx.transactionDate).toLocaleDateString();
-
-    div.innerHTML = `
-      <strong>${tx.type.toUpperCase()}</strong>
-      — ${Number(tx.amount)} ${tx.currency}
-      <br/>
-      ${tx.description || ""}
-      <br/>
-      <small>${date}</small>
-
-      <br/><br/>
-
-      ${
-        tx.receiptUrl
-          ? `<a href="${BACKEND_BASE}${tx.receiptUrl}" target="_blank">
-               📎 View Receipt
-             </a>`
-          : `<input type="file" onchange="uploadReceipt('${tx.id}', this)" />`
+    html += `
+      <tr>
+        <td style="color: var(--text-secondary); font-variant-numeric: tabular-nums;">${date}</td>
+        <td>
+          <span class="badge ${isExpense ? 'badge-neutral' : 'badge-success'}">
+            ${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+          </span>
+        </td>
+        <td style="font-weight: 500;">${tx.description || "—"}</td>
+        <td style="color: ${isExpense ? 'var(--text-primary)' : 'var(--success)'}; font-weight: 600; font-variant-numeric: tabular-nums;">
+          ${isExpense ? '-' : '+'}${getCurrencySymbol(tx.currency)}${amountVal}
+        </td>
+        <td>
+          ${tx.receiptUrl
+        ? `<a href="${BACKEND_BASE}${tx.receiptUrl}" target="_blank" style="color: var(--accent-primary); font-size: 0.8125rem; font-weight: 500;">View Receipt &rarr;</a>`
+        : `<label style="cursor: pointer; font-size: 0.8125rem; color: var(--text-muted); border: 1px dashed var(--border-color); padding: 4px 8px; border-radius: 4px; display: inline-block;">
+                   + Upload
+                   <input type="file" style="display: none;" onchange="uploadReceipt('${tx.id}', this)" />
+                 </label>`
       }
-
-      <br/><br/>
-
-      <button class="danger" onclick="deleteTransaction('${tx.id}')">
-        🗑 Delete
-      </button>
+        </td>
+        <td>
+          <button class="btn-danger" style="padding: 0.375rem 0.75rem; font-size: 0.75rem; border-radius: 6px;" onclick="deleteTransaction('${tx.id}')">Delete</button>
+        </td>
+      </tr>
     `;
-
-    container.appendChild(div);
   });
+
+  html += `</tbody></table>`;
+  container.innerHTML = html;
+}
+
+function getCurrencySymbol(currency) {
+  switch (currency) {
+    case "USD": return "$";
+    case "EUR": return "€";
+    case "INR": return "₹";
+    default: return "";
+  }
 }
 
 /**

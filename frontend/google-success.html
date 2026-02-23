@@ -1,24 +1,35 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-  <title>Logging in...</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authenticating...</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body>
 
-<p>Logging you in with Google...</p>
+<body class="auth-page">
 
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+  <div class="card glass text-center p-6">
+    <div class="loader"
+      style="width: 32px; height: 32px; border-width: 4px; border-top-color: var(--accent-primary); margin-bottom: 1rem;">
+    </div>
+    <h2>Authenticating via Google...</h2>
+    <p class="text-secondary mt-2">Please wait while we redirect you to your dashboard.</p>
+  </div>
 
-  if (!token) {
-    alert("Google login failed");
-    window.location.href = "index.html";
-  } else {
-    localStorage.setItem("token", token);
-    window.location.href = "dashboard.html";
-  }
-</script>
+  <script src="js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("token");
 
+    if (token) {
+      localStorage.setItem("token", token);
+      window.location.href = "/dashboard.html"; // Go to dashboard UI
+    } else {
+      window.location.href = "/";
+    }
+  </script>
 </body>
+
 </html>

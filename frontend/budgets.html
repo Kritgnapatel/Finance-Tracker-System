@@ -1,56 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <title>Budgets</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Budgets - FiscalFlow</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="container">
+  <div class="dashboard-layout" id="app-layout">
 
-  <h2>📊 Budgets</h2>
+    <div class="max-w-3xl">
+      <div class="card glass mb-6">
+        <div class="card-header">
+          <h3 class="card-title">Set Monthly Budget</h3>
+        </div>
 
-  <div class="nav">
-    <a href="dashboard.html">Dashboard</a>
-    <a href="transactions.html">Transactions</a>
-    <a href="profile.html">Profile</a>
-    <button onclick="logout()">Logout</button>
+        <div class="flex flex-col sm:flex-row gap-4 mb-4">
+          <div class="input-group mb-0 flex-1">
+            <label class="input-label" for="budgetCategory">Category</label>
+            <select class="input-field" id="budgetCategory"></select>
+          </div>
+
+          <div class="input-group mb-0 flex-1">
+            <label class="input-label" for="budgetLimit">Limit Amount</label>
+            <input class="input-field" type="number" id="budgetLimit" placeholder="e.g. 5000" />
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 mb-6">
+          <div class="input-group mb-0 flex-1">
+            <label class="input-label" for="budgetMonth">Month</label>
+            <input class="input-field" type="number" id="budgetMonth" placeholder="MM (01-12)" min="1" max="12" />
+          </div>
+
+          <div class="input-group mb-0 flex-1">
+            <label class="input-label" for="budgetYear">Year</label>
+            <input class="input-field" type="number" id="budgetYear" placeholder="YYYY" />
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="setBudget()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Save Budget
+        </button>
+      </div>
+
+      <div class="card p-4 bg-bg-tertiary border border-border-color"
+        style="display: flex; gap: 1rem; align-items: flex-start;">
+        <div style="color: var(--accent-primary); padding-top: 0.25rem;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <div>
+          <h4 class="font-medium text-text-primary m-0 mb-1">How it works</h4>
+          <p class="text-sm m-0">You will instantly receive an email alert when your recorded expenses exceed the limit
+            defined here for the specific month and category.</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <div class="card">
-    <h3>Set Monthly Budget</h3>
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/budgets.js"></script>
+  <script src="js/components/Layout.js"></script>
+  <script>
+    Layout.init('budgets', 'Budgets');
+  </script>
 
-    <select id="budgetCategory"></select>
-
-    <input
-      type="number"
-      id="budgetLimit"
-      placeholder="Limit Amount"
-    />
-
-    <input
-      type="text"
-      id="budgetMonth"
-      placeholder="MM"
-    />
-
-    <input
-      type="text"
-      id="budgetYear"
-      placeholder="YYYY"
-    />
-
-    <button onclick="setBudget()">Save Budget</button>
-  </div>
-
-  <div class="card muted">
-    <strong>How it works</strong><br/>
-    You will receive an email alert when expenses exceed this limit.
-  </div>
-
-</div>
-
-<script src="js/api.js"></script>
-<script src="js/budgets.js"></script>
 </body>
+
 </html>
