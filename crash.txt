@@ -1,0 +1,106 @@
+[dotenv@17.2.4] injecting env (15) from .env -- tip: ???? encrypt with Dotenvx: https://dotenvx.com
+node : node:internal/mo
+dules/cjs/loader:1368
+At line:1 char:1
++ node src/server.js 
+2>&1 | Out-File 
+-Encoding ASCII 
+crash.txt
++ 
+~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo     
+         : 
+NotSpecified: (nod    
+e:internal/modules/cjs 
+   
+/loader:1368:String) [ 
+   ], RemoteException
+    + 
+FullyQualifiedErrorI   
+ d : NativeCommandError
+ 
+  throw err;
+  ^
+
+Error: Cannot find 
+module '../income/incom
+e.model'
+Require stack:
+- C:\Users\patel\Financ
+e_tracker\Finance-Track
+er-System\src\modules\i
+nsights\insights.contro
+ller.js
+- C:\Users\patel\Financ
+e_tracker\Finance-Track
+er-System\src\modules\i
+nsights\insights.routes
+.js
+- C:\Users\patel\Financ
+e_tracker\Finance-Track
+er-System\src\app.js
+- C:\Users\patel\Financ
+e_tracker\Finance-Track
+er-System\src\server.js
+    at Function._resolv
+eFilename (node:interna
+l/modules/cjs/loader:13
+65:15)
+    at 
+defaultResolveImpl (nod
+e:internal/modules/cjs/
+loader:1021:19)
+    at 
+resolveForCJSWithHooks 
+(node:internal/modules/
+cjs/loader:1026:22)
+    at Function._load (
+node:internal/modules/c
+js/loader:1175:37)
+    at TracingChannel.t
+raceSync (node:diagnost
+ics_channel:322:14)
+    at wrapModuleLoad (
+node:internal/modules/c
+js/loader:235:24)
+    at Module.require (
+node:internal/modules/c
+js/loader:1445:12)
+    at require (node:in
+ternal/modules/helpers:
+135:16)
+    at 
+Object.<anonymous> (C:\
+Users\patel\Finance_tra
+cker\Finance-Tracker-Sy
+stem\src\modules\insigh
+ts\insights.controller.
+js:3:16)
+    at Module._compile 
+(node:internal/modules/
+cjs/loader:1688:14) {
+  code: 
+'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\patel\\
+Finance_tracker\\Financ
+e-Tracker-System\\src\\
+modules\\insights\\insi
+ghts.controller.js',
+    'C:\\Users\\patel\\
+Finance_tracker\\Financ
+e-Tracker-System\\src\\
+modules\\insights\\insi
+ghts.routes.js',
+    'C:\\Users\\patel\\
+Finance_tracker\\Financ
+e-Tracker-System\\src\\
+app.js',
+    'C:\\Users\\patel\\
+Finance_tracker\\Financ
+e-Tracker-System\\src\\
+server.js'
+  ]
+}
+
+Node.js v22.18.0

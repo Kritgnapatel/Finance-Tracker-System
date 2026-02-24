@@ -41,7 +41,14 @@ const Transaction = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-
+    recurring: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    recurringInterval: {
+      type: DataTypes.ENUM("monthly", "weekly", "yearly"),
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

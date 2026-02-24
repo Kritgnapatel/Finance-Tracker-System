@@ -52,6 +52,27 @@
   --topbar-height: 72px;
 }
 
+:root.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f4f4f5;
+  --bg-tertiary: #e4e4e7;
+
+  --text-primary: #18181b;
+  --text-secondary: #3f3f46;
+  --text-muted: #71717a;
+
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.15);
+
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(0, 0, 0, 0.05);
+
+  --danger-bg: rgba(239, 68, 68, 0.15);
+  --success-bg: rgba(16, 185, 129, 0.15);
+  
+  /* Keep accents same or adjust slightly if needed */
+}
+
 /* ==========================================================================
    RESET & BASE STYLES
    ========================================================================== */

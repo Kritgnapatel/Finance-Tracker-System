@@ -96,6 +96,67 @@ async function loadMonthly() {
       </div>
     </div>
   `;
+
+  // Fetch Advanced Insights
+  await loadInsights(month, year, symbol);
+}
+
+/**
+ * LOAD ADVANCED INSIGHTS
+ */
+async function loadInsights(month, year, symbol) {
+  try {
+    const res = await apiRequest(`/insights/monthly?month=${month}&year=${year}`);
+    const data = res; // my API responds right with the object since I didn't wrap in { success: true, data: {} } in insights.controller.js. Wait, apiRequest assumes standard axios res.data or direct json?
+    // Let's just use res directly if it doesn't have a `.data` wrapper. Actually api.js might unwrap it or return the raw json. Let's assume `data` is the response object.
+
+    const insightsData = data.totalIncome !== undefined ? data : data.data;
+
+    document.getElementById('insightsCard').style.display = 'block';
+
+    const formatAmount = (num) => Number(num).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    // Calculate Savings Rate
+    let savingsRate = 0;
+    if (insightsData.totalIncome > 0) {
+      savingsRate = ((insightsData.balance / insightsData.totalIncome) * 100).toFixed(1);
+    }
+    document.getElementById('savingsRate').innerText = `${savingsRate}%`;
+
+    // Average Daily Spend
+    document.getElementById('avgDailySpend').innerText = `${symbol}${formatAmount(insightsData.averageDailySpend)}`;
+
+    // Highest Category
+    const highestCatText = insightsData.highestCategoryId || "None";
+    document.getElementById('highestCategorySpend').innerText = highestCatText === 'uncategorized' ? 'Uncategorized' : highestCatText.substring(0, 8);
+
+    // Top Categories List
+    const categoriesDiv = document.getElementById('topCategoriesList');
+    categoriesDiv.innerHTML = '';
+
+    const entries = Object.entries(insightsData.categories).sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) {
+      categoriesDiv.innerHTML = '<p class="text-muted text-sm my-2">No category data available.</p>';
+    } else {
+      entries.slice(0, 4).forEach(([catId, amt]) => {
+        const pct = insightsData.totalExpense > 0 ? (amt / insightsData.totalExpense) * 100 : 0;
+        categoriesDiv.innerHTML += `
+          <div class="mb-3">
+            <div class="flex justify-between text-sm mb-1">
+              <span class="text-text-primary capitalize">${catId === 'uncategorized' ? 'Uncategorized' : 'Cat ' + catId.substring(0, 4)}</span>
+              <span class="font-medium">${symbol}${formatAmount(amt)}</span>
+            </div>
+            <div class="w-full bg-bg-secondary rounded-full h-1.5 border border-border-color overflow-hidden">
+              <div class="bg-accent-primary h-1.5 rounded-full" style="width: ${pct}%; background-color: var(--accent-primary);"></div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+  } catch (error) {
+    console.error("Failed to load insights", error);
+  }
 }
 
 // INIT

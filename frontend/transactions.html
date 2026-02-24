@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Transactions - Finova</title>
   <link rel="stylesheet" href="style.css">
+  <script src="js/theme.js"></script>
 </head>
 
 <body>
@@ -59,8 +60,26 @@
 
       <!-- TRANSACTION HISTORY TABLE -->
       <div class="card glass" style="flex: 2;">
-        <div class="card-header mb-4 pb-4">
-          <h3 class="card-title">Recent History</h3>
+        <div
+          class="card-header mb-4 pb-4 border-b border-border-color flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <h3 class="card-title m-0">Recent History</h3>
+          <div class="flex flex-wrap gap-2 w-full sm:w-auto">
+            <input type="text" id="searchTx" placeholder="Search description..." class="input-field"
+              style="max-width: 200px; padding: 0.5rem;" oninput="applyFilters()" />
+            <select id="filterType" class="input-field" style="max-width: 140px; padding: 0.5rem;"
+              onchange="applyFilters()">
+              <option value="all">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+            <select id="sortTx" class="input-field" style="max-width: 160px; padding: 0.5rem;"
+              onchange="applyFilters()">
+              <option value="date_desc">Newest First</option>
+              <option value="date_asc">Oldest First</option>
+              <option value="amount_desc">Highest Amount</option>
+              <option value="amount_asc">Lowest Amount</option>
+            </select>
+          </div>
         </div>
 
         <div class="table-container">

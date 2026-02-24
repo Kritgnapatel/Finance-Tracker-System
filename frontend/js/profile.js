@@ -5,10 +5,17 @@ async function loadProfile() {
 
   const nameEl = document.getElementById("profileName");
   const emailEl = document.getElementById("profileEmail");
+  const joinEl = document.getElementById("profileJoinDate");
+  const lifetimeEl = document.getElementById("profileLifetimeSpend");
   const currencyEl = document.getElementById("currencySelect");
 
   if (nameEl) nameEl.innerText = res.data.name;
   if (emailEl) emailEl.innerText = res.data.email;
+
+  if (joinEl && res.data.createdAt) {
+    const date = new Date(res.data.createdAt);
+    joinEl.innerText = date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  }
 
   if (res.data.preferredCurrency && currencyEl) {
     currencyEl.value = res.data.preferredCurrency;
@@ -18,6 +25,32 @@ async function loadProfile() {
       "preferredCurrency",
       res.data.preferredCurrency
     );
+  }
+
+  // Calculate Lifetime Spend locally
+  if (lifetimeEl) {
+    try {
+      const txRes = await apiRequest("/transactions");
+      const txs = txRes.data || [];
+      let spend = 0;
+      txs.forEach(t => {
+        if (t.type === 'expense') spend += parseFloat(t.amount);
+      });
+
+      const symbol = getSymbol(res.data.preferredCurrency || "INR");
+      lifetimeEl.innerText = `${symbol}${spend.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    } catch (e) {
+      lifetimeEl.innerText = "Unavailable";
+    }
+  }
+}
+
+function getSymbol(currency) {
+  switch (currency) {
+    case "USD": return "$";
+    case "EUR": return "€";
+    case "INR": return "₹";
+    default: return "";
   }
 }
 

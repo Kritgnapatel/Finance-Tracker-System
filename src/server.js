@@ -8,6 +8,7 @@ require("./modules/users/user.model");
 require("./modules/categories/category.model");
 require("./modules/transactions/transaction.model");
 require("./modules/investments/investment.model");
+require("./modules/savings/savingsGoal.model");
 
 const PORT = process.env.PORT || 5000;
 
