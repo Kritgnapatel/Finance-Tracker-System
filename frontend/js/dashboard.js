@@ -161,3 +161,30 @@ async function loadInsights(month, year, symbol) {
 
 // INIT
 loadSummary();
+loadPayflowSummary();
+
+/**
+ * LOAD PAYFLOW DASHBOARD SUMMARY
+ */
+async function loadPayflowSummary() {
+  try {
+    const res = await apiRequest("/payflow/dashboard");
+    const { totalOwed, totalOwedToMe, pendingCount } = res.data;
+
+    const fmt = (n) => `₹${Number(n).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+
+    // Main heading: net position
+    const net = totalOwedToMe - totalOwed;
+    document.getElementById("pfTotalOwe").innerText = net >= 0
+      ? fmt(net) + " owed to you"
+      : fmt(Math.abs(net)) + " you owe";
+
+    document.getElementById("pfOwe").innerText = fmt(totalOwed);
+    document.getElementById("pfOwed").innerText = fmt(totalOwedToMe);
+    document.getElementById("pfPending").innerText = pendingCount;
+  } catch (e) {
+    // PayFlow summary failure should not break the dashboard
+    console.warn("PayFlow summary unavailable", e);
+  }
+}
+

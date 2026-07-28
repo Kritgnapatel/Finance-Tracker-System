@@ -9,6 +9,11 @@ require("./modules/categories/category.model");
 require("./modules/transactions/transaction.model");
 require("./modules/investments/investment.model");
 require("./modules/savings/savingsGoal.model");
+// PayFlow models
+require("./modules/payflow/payflow_friend.model");
+require("./modules/payflow/payflow_expense.model");
+require("./modules/payflow/payflow_participant.model");
+require("./modules/payflow/payflow_settlement.model");
 
 const PORT = process.env.PORT || 5000;
 

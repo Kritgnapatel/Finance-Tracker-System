@@ -60,6 +60,36 @@
           </svg>
         </div>
       </div>
+
+      <!-- PAYFLOW CARD -->
+      <div class="card stat-card payflow glass" id="payflowCard" style="cursor:pointer;" onclick="window.location.href='payflow.html'">
+        <div style="flex:1;">
+          <h3 class="text-sm text-secondary font-medium m-0">PayFlow</h3>
+          <p class="stat-value" id="pfTotalOwe" style="font-size:1.5rem;">₹0</p>
+          <div class="pf-dashboard-mini">
+            <div class="pf-dashboard-mini-row">
+              <span class="pf-dashboard-mini-label">You owe</span>
+              <span class="pf-dashboard-mini-value text-danger" id="pfOwe">₹0</span>
+            </div>
+            <div class="pf-dashboard-mini-row">
+              <span class="pf-dashboard-mini-label">Owed to you</span>
+              <span class="pf-dashboard-mini-value text-success" id="pfOwed">₹0</span>
+            </div>
+            <div class="pf-dashboard-mini-row">
+              <span class="pf-dashboard-mini-label">Pending</span>
+              <span class="pf-dashboard-mini-value" id="pfPending">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="stat-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+        </div>
+      </div>
     </div>
 
     <!-- MONTHLY REPORT -->

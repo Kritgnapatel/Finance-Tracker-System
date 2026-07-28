@@ -12,6 +12,7 @@ const budgetRoutes = require("./modules/budgets/budget.routes");
 const investmentRoutes = require("./modules/investments/investment.routes");
 const savingsRoutes = require("./modules/savings/savings.routes");
 const insightsRoutes = require("./modules/insights/insights.routes");
+const payflowRoutes = require("./modules/payflow/payflow.routes");
 
 const errorHandler = require("./middlewares/error.middleware");
 
@@ -35,6 +36,7 @@ app.use("/api/budgets", budgetRoutes);
 app.use("/api/investments", investmentRoutes);
 app.use("/api/savings", savingsRoutes);
 app.use("/api/insights", insightsRoutes);
+app.use("/api/payflow", payflowRoutes);
 
 /* ===================== HEALTH ===================== */
 app.get("/api/health", (req, res) => {
