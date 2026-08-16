@@ -1,0 +1,24 @@
+# robots.txt for FiscalFlow – Personal Finance Management Platform
+# Allows Google to crawl the public login/landing page for identity verification.
+# Authenticated pages are excluded from indexing.
+
+User-agent: *
+Allow: /
+Allow: /index.html
+Allow: /style.css
+Allow: /js/
+Allow: /css/
+
+# Do not index authenticated app pages
+Disallow: /dashboard.html
+Disallow: /transactions.html
+Disallow: /budgets.html
+Disallow: /savings.html
+Disallow: /insights.html
+Disallow: /investments.html
+Disallow: /payflow.html
+Disallow: /profile.html
+Disallow: /google-success.html
+Disallow: /api/
+
+Sitemap: https://finance-tracker-backend-2cyr.onrender.com/sitemap.xml

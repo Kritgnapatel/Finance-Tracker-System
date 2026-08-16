@@ -29,8 +29,11 @@ router.get(
     const frontendURL =
       process.env.FRONTEND_URL || "http://localhost:5000";
 
+    // Redirect through google-success.html which immediately moves the token
+    // to localStorage and cleans the URL — prevents token-in-URL heuristic
+    // that Google Safe Browsing flags as a phishing pattern.
     res.redirect(
-      `${frontendURL}/dashboard.html?token=${token}`
+      `${frontendURL}/google-success.html?token=${token}`
     );
   }
 );

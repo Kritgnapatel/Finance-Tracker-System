@@ -18,6 +18,25 @@ const errorHandler = require("./middlewares/error.middleware");
 
 const app = express();
 
+/* ===================== SECURITY HEADERS ===================== */
+// Adds HTTP security headers that signal to browsers and Google Safe Browsing
+// crawlers that this is a legitimate, security-aware web application.
+app.use((req, res, next) => {
+  // Prevent MIME-type sniffing
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  // Prevent clickjacking — only allow framing from same origin
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  // Legacy XSS filter for older browsers
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  // Control referrer info sent to other sites
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  // Restrict access to sensitive browser APIs
+  res.setHeader("Permissions-Policy", "payment=(), microphone=(), camera=()");
+  // Tell browsers/crawlers this app expects HTTPS
+  res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
+  next();
+});
+
 /* ===================== GLOBAL MIDDLEWARES ===================== */
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
